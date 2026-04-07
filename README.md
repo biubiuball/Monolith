@@ -1,107 +1,191 @@
 <div align="center">
-  <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/box.svg" width="120" height="120" alt="Monolith Logo" />
-  <h1 style="border-bottom: none; margin-bottom: 0;">Monolith</h1>
-  <p><strong>A Premium Serverless Edge-Native Blog System</strong></p>
-  
-  <p>
-    <a href="#features">Features</a> •
-    <a href="#architecture">Architecture</a> •
-    <a href="#quick-start">Quick Start</a> •
-    <a href="#deployment">Deployment</a>
-  </p>
 
-  <p>
-    <img src="https://img.shields.io/badge/Vite-6.0-646CFF?style=flat-square&logo=vite&logoColor=white" alt="Vite" />
-    <img src="https://img.shields.io/badge/React-19.0-61DAFB?style=flat-square&logo=react&logoColor=black" alt="React" />
-    <img src="https://img.shields.io/badge/Hono-4.7-E36002?style=flat-square&logo=hono&logoColor=white" alt="Hono" />
-    <img src="https://img.shields.io/badge/Cloudflare_Workers-F38020?style=flat-square&logo=cloudflare&logoColor=white" alt="Cloudflare" />
-    <img src="https://img.shields.io/badge/Tailwind_CSS-v4-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white" alt="Tailwind CSS" />
-  </p>
-</div>
+<img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/box.svg" width="96" height="96" alt="Monolith" />
+
+# Monolith
+
+**A Premium Serverless Edge-Native Blog System**
+
+*极致视觉 · 边缘计算 · 多后端存储 · 零运维成本*
 
 <br/>
 
-Monolith 是一款专注于**极致视觉体验**与**极致性能**的无服务器边缘博客系统。基于 Cloudflare Workers 架构构建，前后台深度解耦。摒弃了所有的臃肿，只为您呈现前所未有的「丝滑、极简、高冷」的内容创作与阅读体验。
+[![License: MIT](https://img.shields.io/badge/License-MIT-22c55e?style=flat-square)](LICENSE)
+[![Cloudflare Workers](https://img.shields.io/badge/Cloudflare-Workers-F38020?style=flat-square&logo=cloudflare&logoColor=white)](https://workers.cloudflare.com/)
+[![Vite](https://img.shields.io/badge/Vite-6.x-646CFF?style=flat-square&logo=vite&logoColor=white)](https://vitejs.dev/)
+[![React](https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react&logoColor=black)](https://react.dev/)
+[![Hono](https://img.shields.io/badge/Hono-4.x-E36002?style=flat-square&logo=hono&logoColor=white)](https://hono.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 
-> 🎨 **Slate & Cyan 设计语言**：剔除艳俗的亮色，沉浸式高质感暗黑主题。原生果冻般的阻尼动画加载体验，为您带来电影级的交互大赏。
+<br/>
 
-## 🌟 Core Features | 核心特性
+[**📚 Wiki 文档**](../../wiki) · [**🐛 提交 Issue**](../../issues) · [**☁️ 在线预览**](https://monolith-client.pages.dev)
 
-- ⚡️ **Edge Native (边缘原生)**: 后端采用 Hono 直接运行于全球分布的 Cloudflare Workers 边缘节点，告别冷启动（0ms Cold Start），毫秒级响应。
-- 🧊 **Premium UI (高级视觉层)**: 基于高解析度打磨的 TailwindCSS v4 引擎，内建精挑细选的 “Slate & Cyan” 色彩规范，原生集成 Apple 级 `cubic-bezier` 平滑进场与高斯模糊动效层。
-- 🔌 **Pluggable Storage (存储抽象层)**:
-  - 核心数据默认使用无缝的 Cloudflare **D1** (SQLite)，兼容横向扩展接入 **Turso** 乃至标准 **PostgreSQL**。
-  - 媒体库对象存储默认直连无下行流量费的 **R2**，支持通过环境变量一秒内挂载任意 **S3 兼容** 云资源（如阿里云 OSS、AWS）。
-- 📝 **Intelligent Markdown (无感挂载引擎)**: 撰写文章只需标准 Markdown。系统自动将代码块渲染为带有精美复制按钮的智能框，且自动将视频直链及 B 站/YouTube 链接展开为原生画中画播放器。
+</div>
 
 ---
 
-## 🏗 Architecture | 系统架构
+## ✨ 项目简介
 
-Monolith 采用典型的横向双栈（Monorepo）分离架构设计：
+Monolith 是一套运行在 **Cloudflare 全球边缘网络**上的现代化无服务器博客系统。前后端完全解耦，通过适配器模式支持多种数据库与对象存储后端，无需运维，全球延迟 < 50ms。
 
-```text
-Monolith
-├── client/       # 前端 UI 端 (React 19 + Vite 6 + Wouter)
-│   ├── src/pages/     # 页面组件
-│   └── src/components/# 原子级精细 UI 组件库 (轻量级 Shadcn)
-└── server/       # 核心服务端 (Hono + Drizzle ORM)
-    ├── src/index.ts   # 后端主入口与 API 路由中心
-    └── src/storage/   # 核心亮点：灵活组合的适配器引擎
+> 🎨 **Slate & Cyan 设计语言**：高质感深色主题，玻璃拟态效果，Apple 级 `cubic-bezier` 阻尼动画，为读者和作者提供沉浸式体验。
+
+---
+
+## 🌟 核心特性
+
+| 特性 | 描述 |
+|------|------|
+| ⚡ **边缘原生** | Hono 运行于 Cloudflare Workers，无冷启动，全球毫秒级响应 |
+| 🔌 **存储适配器** | 数据库：D1 / Turso / PostgreSQL；对象存储：R2 / S3 兼容，环境变量一键切换 |
+| 🎨 **高级视觉层** | Slate & Cyan 配色、玻璃拟态、平滑动画、响应式布局 |
+| 📝 **Markdown 渲染** | 代码高亮、一键复制、自动提取 TOC、阅读进度条 |
+| 🔐 **安全设计** | JWT 认证 + 路由守卫双重防护，管理入口隐藏设计 |
+| 📊 **数据洞察** | 文章浏览量统计、热门内容排行、RSS 订阅源 |
+| 💬 **评论系统** | 访客留言、Honeypot 反垃圾、人工审核机制 |
+| 💾 **多端备份** | 导出 JSON / 备份到 R2-S3 / WebDAV 远端同步 |
+| 🗺️ **SEO 就绪** | 动态 sitemap.xml、RSS 2.0、robots.txt |
+
+---
+
+## 🏗️ 架构概览
+
+```
+┌─────────────────────┐         ┌──────────────────────────┐
+│  Cloudflare Pages   │         │   Cloudflare Workers     │
+│                     │ ──API──▶│                          │
+│  Vite + React SPA   │         │  Hono  ─▶  IDatabase     │
+│  静态资源 + CDN      │         │           ├── D1         │
+└─────────────────────┘         │           ├── Turso      │
+                                │           └── PostgreSQL │
+                                │                          │
+                                │        ─▶  IObjectStorage│
+                                │           ├── R2         │
+                                │           └── S3 兼容    │
+                                └──────────────────────────┘
 ```
 
+> 详细架构说明请参阅 [Wiki · 架构概览](../../wiki/Architecture)
+
 ---
 
-## 🚀 Quick Start | 本地极速开发
+## 🚀 快速开始
 
-### 1. 环境准备
-请确保您的系统环境已安装 [Node.js](https://nodejs.org/) (建议 LTS) 与 npm。
+### 环境要求
 
-### 2. 克隆项目与依赖同步
+- Node.js 18+（推荐通过 nvm 管理）
+- Wrangler CLI 4.x
+- Cloudflare 账号
+
+### 本地开发
+
 ```bash
-git clone https://github.com/your-username/monolith.git
-cd monolith
+# 1. 克隆项目
+git clone https://github.com/one-ea/Monolith.git
+cd Monolith
 
-# 分别进入前端与后端进行依赖安装
-cd client && npm install
-cd ../server && npm install
+# 2. 安装依赖
+cd client && npm install && cd ../server && npm install && cd ..
+
+# 3. 配置环境变量
+cat > server/.dev.vars << 'EOF'
+ADMIN_PASSWORD=your_secure_password
+JWT_SECRET=your_random_secret_key
+EOF
+
+# 4. 初始化本地数据库
+cd server && npx wrangler d1 migrations apply monolith-db --local
+
+# 5. 启动服务（两个终端）
+cd server && npm run dev      # → http://localhost:8787
+cd client && npm run dev      # → http://localhost:5173
 ```
 
-### 3. 本地数据库初始化 (D1 模式)
-在启动后端服务前，请先让 Drizzle 为您的本地测试环境刷入数据表以及样本：
+> 📖 完整指南请参阅 [Wiki · 快速开始](../../wiki/Quick-Start)
+
+---
+
+## ☁️ 一键部署
+
+### 后端 (Workers)
+
 ```bash
 cd server
-npm run db:migrate:local  # 生成库表结构
-npm run db:seed:local     # 灌入演示文章与预设数据
+npx wrangler secret put ADMIN_PASSWORD
+npx wrangler secret put JWT_SECRET
+npx wrangler d1 migrations apply monolith-db --remote
+npx wrangler deploy
 ```
 
-### 4. 引擎点火！
-开启分开的终端窗口，分别切入目录挂载热更新服务器：
+### 前端 (Pages)
+
 ```bash
-# 终端 1 (后端引擎: 监听 8787 端口)
-cd server && npm run dev
-
-# 终端 2 (前台界面: 监听 5173 端口)
-cd client && npm run dev
+cd client
+npm run build
+npx wrangler pages deploy dist --project-name monolith-client --branch=master
 ```
-打开 `http://localhost:5173` 尽情流连忘返吧。
-（默认管理后台入口：`/admin/login`，密码：`admin`）
+
+> 📖 完整部署步骤请参阅 [Wiki · 部署指南](../../wiki/Deployment)
 
 ---
 
-## 🪂 Deployment | 零成本部署到 Cloudflare
+## 📁 项目结构
 
-只需 3 分钟，即可将您的私人数字堡垒部署到全球边缘网络。
-
-**步骤大纲：**
-1. 登录 Cloudflare Dashboard，创建 D1 实例（命名为 `monolith-db`）与 R2 存储桶（命名为 `monolith-media`）。
-2. 在 `server/wrangler.toml` 填入上述两者的 UUID ID 映射。
-3. 执行生产库推送：`cd server && npm run db:migrate:remote`。
-4. 部署后端 Worker 核心：`cd server && npm run deploy`。
-5. 前端编译与一键推送 Cloudflare Pages：`cd client && npm run build` 然后选择连接至当前 Github Repo，设置打包目录为 `dist` 即可。
+```
+Monolith/
+├── client/                 # 前端 Vite + React SPA
+│   └── src/
+│       ├── app.tsx         # 路由（含 ProtectedRoute 守卫）
+│       ├── components/     # 组件库
+│       ├── pages/          # 页面（含 admin/ 后台）
+│       └── lib/api.ts      # API 客户端
+│
+└── server/                 # 后端 Hono Workers
+    └── src/
+        ├── index.ts        # API 路由总入口
+        └── storage/        # 存储适配器层
+            ├── interfaces.ts   # IDatabase / IObjectStorage
+            ├── factory.ts      # 工厂（按环境变量选择实现）
+            ├── db/             # D1 / Turso / PostgreSQL 适配器
+            └── object/         # R2 / S3 适配器
+```
 
 ---
 
-## 📄 License | 开源协议
+## 🔀 分支策略
 
-MIT License. Crafted with passion code & relentless design aesthetics.
+| 分支 | 环境 | 说明 |
+|------|------|------|
+| `master` | **生产** `monolith-client.pages.dev` | 保护分支，只接受 PR 合并 |
+| `dev` | 开发预览 | 日常开发在此分支进行 |
+
+```bash
+# 日常开发流程
+git checkout dev
+# ... 开发 ...
+git push                    # 推送到 dev
+# 在 GitHub 发起 PR: dev → master
+```
+
+---
+
+## 📚 文档
+
+| 文档 | 链接 |
+|------|------|
+| 架构概览 | [Wiki · Architecture](../../wiki/Architecture) |
+| 快速开始 | [Wiki · Quick-Start](../../wiki/Quick-Start) |
+| 前端开发指南 | [Wiki · Frontend-Guide](../../wiki/Frontend-Guide) |
+| 后端开发指南 | [Wiki · Backend-Guide](../../wiki/Backend-Guide) |
+| 存储适配器 | [Wiki · Storage-Adapters](../../wiki/Storage-Adapters) |
+| 安全设计 | [Wiki · Security](../../wiki/Security) |
+| API 参考 | [Wiki · API-Reference](../../wiki/API-Reference) |
+| 部署指南 | [Wiki · Deployment](../../wiki/Deployment) |
+| 功能特性 | [Wiki · Features](../../wiki/Features) |
+
+---
+
+## 📄 License
+
+[MIT](LICENSE) · Crafted with passion & relentless design aesthetics.
