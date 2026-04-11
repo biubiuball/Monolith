@@ -79,41 +79,41 @@ export function Navbar() {
             ))}
           </nav>
 
-          {/* 搜索 + 主题切换（所有尺寸可见） */}
+          {/* 右侧工具区：搜索 + 主题 + 移动端菜单 */}
           <div className="flex items-center gap-[4px]">
             <SearchTrigger />
             <span className="w-[1px] h-[16px] bg-border/40 mx-[2px]" />
             <ThemeToggle />
-          </div>
 
-          {/* 移动端菜单 */}
-          <Sheet open={open} onOpenChange={setOpen}>
-            <SheetTrigger className="md:hidden inline-flex items-center justify-center h-[36px] w-[36px] rounded-md text-muted-foreground hover:bg-accent hover:text-foreground transition-colors duration-200">
-              <Menu className="h-[18px] w-[18px]" />
-            </SheetTrigger>
-            <SheetContent side="right" className="w-[280px] bg-background/95 backdrop-blur-xl">
-              <nav className="flex flex-col gap-[4px] pt-[40px]">
-                {navLinks.map((link) => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    onClick={() => setOpen(false)}
-                    className={`rounded-md px-[16px] py-[12px] text-[15px] transition-colors duration-200 ${
-                      location === link.href
-                        ? "bg-accent text-foreground font-medium"
-                        : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
-                    }`}
-                  >
-                    {link.label}
-                  </Link>
-                ))}
-                <div className="mt-[8px] px-[16px] flex items-center gap-[8px]">
-                  <span className="text-[12px] text-muted-foreground/40">主题</span>
-                  <ThemeToggle />
-                </div>
-              </nav>
-            </SheetContent>
-          </Sheet>
+            {/* 移动端汉堡菜单 */}
+            <Sheet open={open} onOpenChange={setOpen}>
+              <SheetTrigger className="md:hidden inline-flex items-center justify-center h-[36px] w-[36px] rounded-md text-muted-foreground hover:bg-accent hover:text-foreground transition-colors duration-200 ml-[4px]">
+                <Menu className="h-[18px] w-[18px]" />
+              </SheetTrigger>
+              <SheetContent side="right" className="w-[280px] bg-background/95 backdrop-blur-xl">
+                <nav className="flex flex-col gap-[4px] pt-[40px]">
+                  {navLinks.map((link) => (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      onClick={() => setOpen(false)}
+                      className={`rounded-md px-[16px] py-[12px] text-[15px] transition-colors duration-200 ${
+                        location === link.href
+                          ? "bg-accent text-foreground font-medium"
+                          : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
+                      }`}
+                    >
+                      {link.label}
+                    </Link>
+                  ))}
+                  <div className="mt-[8px] px-[16px] flex items-center gap-[8px]">
+                    <span className="text-[12px] text-muted-foreground/40">主题</span>
+                    <ThemeToggle />
+                  </div>
+                </nav>
+              </SheetContent>
+            </Sheet>
+          </div>
         </div>
       </header>
 
