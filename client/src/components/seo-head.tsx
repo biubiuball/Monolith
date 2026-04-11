@@ -94,11 +94,23 @@ export function SeoHead({
     setMeta("name", "twitter:image", ogImage);
 
     // Article 专属
+    // 先清理旧的 article 相关 meta（防止页面切换残留）
+    document.querySelectorAll('meta[property^="article:"]').forEach((el) => el.remove());
+
     if (type === "article" && publishedTime) {
       setMeta("property", "article:published_time", publishedTime);
     }
+    if (type === "article" && modifiedTime) {
+      setMeta("property", "article:modified_time", modifiedTime);
+    }
     if (type === "article" && tags?.length) {
-      tags.forEach((tag) => setMeta("property", "article:tag", tag));
+      // 每个标签需要独立的 <meta> 元素（不能复用同一个）
+      tags.forEach((tag) => {
+        const el = document.createElement("meta");
+        el.setAttribute("property", "article:tag");
+        el.setAttribute("content", tag);
+        document.head.appendChild(el);
+      });
     }
 
     // JSON-LD 结构化数据
@@ -170,10 +182,12 @@ export function SeoHead({
       ldScript.remove();
     }
 
-    // 组件卸载时清理 JSON-LD
+    // 组件卸载时清理动态注入的标签
     return () => {
       const script = document.querySelector('script[data-seo="json-ld"]');
       script?.remove();
+      // 清理 article 相关 meta（防止页面切换残留）
+      document.querySelectorAll('meta[property^="article:"]').forEach((el) => el.remove());
     };
   }, [fullTitle, metaDescription, canonicalUrl, ogImage, type, publishedTime, modifiedTime, title, siteName, tags, breadcrumbs]);
 

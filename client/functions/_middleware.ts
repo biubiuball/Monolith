@@ -52,8 +52,9 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       updatedAt: string;
     }>();
 
-    // 获取原始 index.html
-    const assetRes = await context.env.ASSETS.fetch(request);
+    // 获取原始 index.html（用根路径请求静态资源）
+    const indexUrl = new URL("/", request.url);
+    const assetRes = await context.env.ASSETS.fetch(new Request(indexUrl.toString()));
     let html = await assetRes.text();
 
     // 生成摘要（优先用 excerpt，否则从 content 截取）
