@@ -23,22 +23,70 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install client dependencies
+      - name: Install client deps + ESLint
         working-directory: client
-        run: npm ci
+        run: |
+          npm ci
+          npm install --no-save eslint @eslint/js @typescript-eslint/eslint-plugin @typescript-eslint/parser eslint-plugin-security @microsoft/eslint-formatter-sarif
 
-      - name: Install server dependencies
+      - name: Install server deps + ESLint
         working-directory: server
-        run: npm ci
+        run: |
+          npm ci
+          npm install --no-save eslint @eslint/js @typescript-eslint/eslint-plugin @typescript-eslint/parser eslint-plugin-security @microsoft/eslint-formatter-sarif
+
+      - name: Create ESLint config (client)
+        working-directory: client
+        run: |
+          cat > eslint.config.mjs << 'EOF'
+          import security from "eslint-plugin-security";
+          import tseslint from "@typescript-eslint/eslint-plugin";
+          import tsparser from "@typescript-eslint/parser";
+          export default [
+            {
+              files: ["**/*.{ts,tsx}"],
+              plugins: { security, "@typescript-eslint": tseslint },
+              languageOptions: { parser: tsparser, parserOptions: { ecmaVersion: "latest", sourceType: "module" } },
+              rules: {
+                ...security.configs.recommended.rules,
+                "no-eval": "error",
+                "no-implied-eval": "error",
+              },
+            },
+            { ignores: ["dist/", "node_modules/", "*.config.*"] },
+          ];
+          EOF
+
+      - name: Create ESLint config (server)
+        working-directory: server
+        run: |
+          cat > eslint.config.mjs << 'EOF'
+          import security from "eslint-plugin-security";
+          import tseslint from "@typescript-eslint/eslint-plugin";
+          import tsparser from "@typescript-eslint/parser";
+          export default [
+            {
+              files: ["**/*.ts"],
+              plugins: { security, "@typescript-eslint": tseslint },
+              languageOptions: { parser: tsparser, parserOptions: { ecmaVersion: "latest", sourceType: "module" } },
+              rules: {
+                ...security.configs.recommended.rules,
+                "no-eval": "error",
+                "no-implied-eval": "error",
+              },
+            },
+            { ignores: ["dist/", "node_modules/", "*.config.*"] },
+          ];
+          EOF
 
       - name: Run ESLint on client (SARIF)
         working-directory: client
-        run: npx eslint . --format @microsoft/eslint-formatter-sarif --output-file ../eslint-client.sarif || true
+        run: npx eslint "src/**/*.{ts,tsx}" --format @microsoft/eslint-formatter-sarif --output-file ../eslint-client.sarif || true
         continue-on-error: true
 
       - name: Run ESLint on server (SARIF)
         working-directory: server
-        run: npx eslint . --format @microsoft/eslint-formatter-sarif --output-file ../eslint-server.sarif || true
+        run: npx eslint "src/**/*.ts" --format @microsoft/eslint-formatter-sarif --output-file ../eslint-server.sarif || true
         continue-on-error: true
 
       - name: Upload client SARIF
