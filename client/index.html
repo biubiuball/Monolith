@@ -23,15 +23,14 @@
     <link rel="alternate" type="application/rss+xml" title="Monolith RSS" href="/rss.xml" />
   </head>
   <body class="min-h-full flex flex-col font-sans bg-background text-foreground">
-    <!-- 主题初始化：防止页面加载时闪烁 -->
+    <!-- 主题初始化：在 React 加载前设置 data-theme，防止闪烁 -->
     <script>
       (function(){
-        var t = localStorage.getItem('monolith-theme') || 'dark';
+        var t = localStorage.getItem('theme') || 'dark';
         var d = t === 'system'
           ? (window.matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light')
           : t;
-        if (d === 'dark') document.documentElement.classList.add('dark');
-        else document.documentElement.classList.remove('dark');
+        document.documentElement.setAttribute('data-theme', d);
       })();
     </script>
     <div id="root" class="min-h-screen flex flex-col"></div>

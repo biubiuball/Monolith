@@ -49,7 +49,9 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-:root {
+/* ── 暗色主题（默认） ─── */
+:root,
+:root[data-theme="dark"] {
   --background: oklch(0.18 0.006 220);
   --foreground: oklch(0.94 0 220);
   --card: oklch(0.22 0.007 220);
@@ -82,6 +84,44 @@
   --sidebar-accent-foreground: oklch(0.90 0 220);
   --sidebar-border: oklch(1 0 220 / 10%);
   --sidebar-ring: oklch(0.55 0 220);
+  color-scheme: dark;
+}
+
+/* ── 亮色主题 ─── */
+:root[data-theme="light"] {
+  --background: oklch(0.975 0.002 250);
+  --foreground: oklch(0.16 0.006 250);
+  --card: oklch(1.00 0 0);
+  --card-foreground: oklch(0.16 0.006 250);
+  --popover: oklch(1.00 0 0);
+  --popover-foreground: oklch(0.16 0.006 250);
+  --primary: oklch(0.16 0.006 250);
+  --primary-foreground: oklch(0.975 0 250);
+  --secondary: oklch(0.94 0.004 250);
+  --secondary-foreground: oklch(0.20 0 250);
+  --muted: oklch(0.94 0.004 250);
+  --muted-foreground: oklch(0.46 0.01 250);
+  --accent: oklch(0.94 0.006 250);
+  --accent-foreground: oklch(0.16 0 250);
+  --destructive: oklch(0.55 0.22 25);
+  --border: oklch(0 0 0 / 9%);
+  --input: oklch(0 0 0 / 11%);
+  --ring: oklch(0.55 0.02 250);
+  --chart-1: oklch(0.30 0 250);
+  --chart-2: oklch(0.45 0 250);
+  --chart-3: oklch(0.55 0 250);
+  --chart-4: oklch(0.65 0 250);
+  --chart-5: oklch(0.80 0 250);
+  --radius: 0.625rem;
+  --sidebar: oklch(0.97 0.002 250);
+  --sidebar-foreground: oklch(0.16 0.006 250);
+  --sidebar-primary: oklch(0.40 0.20 250);
+  --sidebar-primary-foreground: oklch(0.985 0 250);
+  --sidebar-accent: oklch(0.94 0.004 250);
+  --sidebar-accent-foreground: oklch(0.16 0 250);
+  --sidebar-border: oklch(0 0 0 / 9%);
+  --sidebar-ring: oklch(0.55 0.02 250);
+  color-scheme: light;
 }
 
 /* ─────────────────────────────────────────────
@@ -545,6 +585,119 @@
 .hljs-name { color: oklch(0.72 0.14 10); }
 .hljs-selector-class { color: oklch(0.75 0.12 80); }
 .hljs-selector-id { color: oklch(0.75 0.12 80); }
+
+/* ── 亮色模式代码高亮覆盖 ─── */
+:root[data-theme="light"] .hljs { color: oklch(0.30 0 0); }
+:root[data-theme="light"] .hljs-keyword { color: oklch(0.42 0.20 290); }
+:root[data-theme="light"] .hljs-string { color: oklch(0.45 0.16 150); }
+:root[data-theme="light"] .hljs-number { color: oklch(0.48 0.16 60); }
+:root[data-theme="light"] .hljs-comment { color: oklch(0.55 0 0); }
+:root[data-theme="light"] .hljs-function,
+:root[data-theme="light"] .hljs-title,
+:root[data-theme="light"] .hljs-title.function_ { color: oklch(0.42 0.16 230); }
+:root[data-theme="light"] .hljs-params { color: oklch(0.45 0.08 60); }
+:root[data-theme="light"] .hljs-type,
+:root[data-theme="light"] .hljs-built_in { color: oklch(0.42 0.16 200); }
+:root[data-theme="light"] .hljs-literal { color: oklch(0.42 0.16 30); }
+:root[data-theme="light"] .hljs-attr { color: oklch(0.48 0.14 80); }
+:root[data-theme="light"] .hljs-property { color: oklch(0.42 0.12 230); }
+:root[data-theme="light"] .hljs-meta { color: oklch(0.45 0.10 220); }
+:root[data-theme="light"] .hljs-punctuation { color: oklch(0.40 0 0); }
+:root[data-theme="light"] .hljs-variable { color: oklch(0.40 0.08 200); }
+:root[data-theme="light"] .hljs-tag,
+:root[data-theme="light"] .hljs-name { color: oklch(0.45 0.18 10); }
+:root[data-theme="light"] .hljs-selector-class,
+:root[data-theme="light"] .hljs-selector-id { color: oklch(0.48 0.16 80); }
+
+/* ── 亮色模式代码块背景覆盖 ─── */
+:root[data-theme="light"] .prose-monolith pre {
+  background: oklch(0.96 0.002 250) !important;
+  border-color: oklch(0 0 0 / 8%);
+}
+:root[data-theme="light"] .prose-monolith pre code {
+  color: oklch(0.30 0 0);
+}
+:root[data-theme="light"] .prose-monolith code {
+  background: oklch(0.93 0.004 250);
+  color: oklch(0.35 0.08 250);
+  border-color: oklch(0 0 0 / 8%);
+}
+:root[data-theme="light"] .prose-monolith .code-lang {
+  color: oklch(0.55 0 0);
+}
+:root[data-theme="light"] .prose-monolith .copy-code-btn {
+  color: oklch(0.45 0 0);
+  background: oklch(0.93 0 0);
+  border-color: oklch(0 0 0 / 10%);
+}
+:root[data-theme="light"] .prose-monolith .code-line-num {
+  color: oklch(0.65 0 0);
+  border-color: oklch(0 0 0 / 6%);
+}
+
+/* ── 亮色模式 prose 排版覆盖 ─── */
+:root[data-theme="light"] .prose-monolith {
+  color: oklch(0.25 0 0);
+}
+:root[data-theme="light"] .prose-monolith h2 {
+  color: oklch(0.12 0 0);
+}
+:root[data-theme="light"] .prose-monolith h3 {
+  color: oklch(0.15 0 0);
+}
+:root[data-theme="light"] .prose-monolith h4 {
+  color: oklch(0.18 0 0);
+}
+:root[data-theme="light"] .prose-monolith strong {
+  color: oklch(0.12 0 0);
+}
+:root[data-theme="light"] .prose-monolith a {
+  color: oklch(0.42 0.16 250);
+  text-decoration-color: oklch(0.42 0.16 250 / 40%);
+}
+:root[data-theme="light"] .prose-monolith a:hover {
+  color: oklch(0.35 0.20 250);
+  text-decoration-color: oklch(0.35 0.20 250 / 70%);
+}
+:root[data-theme="light"] .prose-monolith blockquote {
+  border-left-color: oklch(0.5 0.12 250 / 60%);
+  background: oklch(0 0 0 / 3%);
+}
+:root[data-theme="light"] .prose-monolith blockquote p {
+  color: oklch(0.35 0 0);
+}
+:root[data-theme="light"] .prose-monolith code:not(pre code) {
+  background: oklch(0 0 0 / 5%);
+  border-color: oklch(0 0 0 / 8%);
+  color: oklch(0.35 0.10 250);
+}
+:root[data-theme="light"] .prose-monolith li::marker {
+  color: oklch(0.45 0 0);
+}
+:root[data-theme="light"] .prose-monolith hr {
+  border-top-color: oklch(0 0 0 / 10%);
+}
+:root[data-theme="light"] .prose-monolith .table-wrapper {
+  border-color: oklch(0 0 0 / 8%);
+}
+:root[data-theme="light"] .prose-monolith th {
+  color: oklch(0.20 0 0);
+  background: oklch(0 0 0 / 3%);
+  border-bottom-color: oklch(0 0 0 / 12%);
+}
+:root[data-theme="light"] .prose-monolith td {
+  color: oklch(0.30 0 0);
+  border-bottom-color: oklch(0 0 0 / 6%);
+}
+:root[data-theme="light"] .prose-monolith tr:hover td {
+  background: oklch(0 0 0 / 2%);
+}
+:root[data-theme="light"] .prose-monolith .md-figure img {
+  border-color: oklch(0 0 0 / 8%);
+}
+:root[data-theme="light"] .prose-monolith .md-figure figcaption {
+  color: oklch(0.45 0 0);
+}
 
 /* ─────────────────────────────────────────────
    滚动条样式 (Webkit)
