@@ -124,7 +124,7 @@ export function HomePage() {
         </section>
 
         <aside className="hidden lg:block">
-          <div className="sticky top-[72px] flex flex-col gap-[24px]">
+          <div className="sticky top-[72px] flex flex-col gap-[24px] mt-[42px]">
             {/* ── 博主名片 ── */}
             <AnimateIn animation="animate-fade-in" delay="delay-2">
               <div className="rounded-lg border border-border/40 bg-card/30 p-[20px]">
