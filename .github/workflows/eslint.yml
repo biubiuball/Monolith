@@ -1,0 +1,58 @@
+name: "ESLint Security Scan"
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  eslint:
+    name: ESLint 安全扫描
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install client dependencies
+        working-directory: client
+        run: npm ci
+
+      - name: Install server dependencies
+        working-directory: server
+        run: npm ci
+
+      - name: Run ESLint on client (SARIF)
+        working-directory: client
+        run: npx eslint . --format @microsoft/eslint-formatter-sarif --output-file ../eslint-client.sarif || true
+        continue-on-error: true
+
+      - name: Run ESLint on server (SARIF)
+        working-directory: server
+        run: npx eslint . --format @microsoft/eslint-formatter-sarif --output-file ../eslint-server.sarif || true
+        continue-on-error: true
+
+      - name: Upload client SARIF
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: eslint-client.sarif
+          category: eslint-client
+        continue-on-error: true
+
+      - name: Upload server SARIF
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: eslint-server.sarif
+          category: eslint-server
+        continue-on-error: true
