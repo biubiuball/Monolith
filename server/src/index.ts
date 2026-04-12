@@ -88,6 +88,14 @@ app.get("/api/posts/:slug", async (c) => {
   return c.json(post);
 });
 
+// 获取同系列文章列表
+app.get("/api/series/:slug", async (c) => {
+  const seriesSlug = c.req.param("slug");
+  const db = c.get("db");
+  const seriesPosts = await db.getSeriesPosts(seriesSlug);
+  return c.json(seriesPosts);
+});
+
 // 获取所有标签
 app.get("/api/tags", async (c) => {
   const db = c.get("db");

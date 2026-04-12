@@ -20,6 +20,8 @@ export const posts = sqliteTable("posts", {
   viewCount: integer("view_count").notNull().default(0),
   pinned: integer("pinned", { mode: "boolean" }).notNull().default(false),
   publishAt: text("publish_at"),
+  seriesSlug: text("series_slug"),
+  seriesOrder: integer("series_order").notNull().default(0),
 });
 
 /* ── 标签表 ────────────────────────────────── */

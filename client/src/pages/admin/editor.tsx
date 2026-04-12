@@ -118,6 +118,8 @@ export function AdminEditor() {
     published: true,
     pinned: false,
     publishAt: "",
+    seriesSlug: "",
+    seriesOrder: 0,
   });
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState({ text: "", type: "" as "" | "success" | "error" });
@@ -144,6 +146,8 @@ export function AdminEditor() {
           published: post.published,
           pinned: post.pinned,
           publishAt: post.publishAt ? new Date(new Date(post.publishAt).getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16) : "",
+          seriesSlug: post.seriesSlug || "",
+          seriesOrder: post.seriesOrder ?? 0,
         });
         setAutoSlug(false);
       });
@@ -208,6 +212,8 @@ export function AdminEditor() {
         tags: tagsList,
         pinned: form.pinned,
         publishAt: form.publishAt ? new Date(form.publishAt).toISOString() : null,
+        seriesSlug: form.seriesSlug || null,
+        seriesOrder: form.seriesOrder,
       };
 
       if (isEdit && params.slug) {
@@ -491,7 +497,7 @@ export function AdminEditor() {
 
           {!metaCollapsed && (
             <div className="px-[16px] pb-[14px] pt-[2px]">
-              <div className="grid grid-cols-1 gap-[8px] sm:grid-cols-3">
+              <div className="grid grid-cols-1 gap-[8px] sm:grid-cols-3 lg:grid-cols-5">
                 <div>
                   <label className="mb-[2px] block text-[10px] text-muted-foreground/35 uppercase tracking-wider">Slug {autoSlug && <span className="text-blue-400/50">（自动）</span>}</label>
                   <input
@@ -529,6 +535,15 @@ export function AdminEditor() {
                       />
                     ))}
                   </div>
+                </div>
+                <div>
+                  <label className="mb-[2px] block text-[10px] text-muted-foreground/35 uppercase tracking-wider">系列 Slug</label>
+                  <input
+                    value={form.seriesSlug}
+                    onChange={(e) => updateField("seriesSlug", e.target.value)}
+                    placeholder="如 react-tutorial"
+                    className="h-[30px] w-full rounded-md border border-border/25 bg-background/20 px-[10px] text-[12px] text-foreground font-mono placeholder:text-muted-foreground/20 outline-none focus:border-foreground/15 transition-colors"
+                  />
                 </div>
               </div>
               <input

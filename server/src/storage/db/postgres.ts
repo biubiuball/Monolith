@@ -151,6 +151,7 @@ export class PostgresAdapter implements IDatabase {
         createdAt: pgPosts.createdAt,
         pinned: pgPosts.pinned,
         publishAt: pgPosts.publishAt,
+        seriesSlug: pgPosts.seriesSlug,
       })
       .from(pgPosts)
       .where(
@@ -169,6 +170,7 @@ export class PostgresAdapter implements IDatabase {
         tags: await this.getPostTags(post.id),
         pinned: post.pinned,
         publishAt: this.ts(post.publishAt),
+        seriesSlug: post.seriesSlug || null,
       }))
     );
   }
@@ -194,6 +196,8 @@ export class PostgresAdapter implements IDatabase {
         viewCount: post.viewCount ?? 0,
         pinned: post.pinned,
         publishAt: this.ts(post.publishAt),
+        seriesSlug: post.seriesSlug || null,
+        seriesOrder: post.seriesOrder ?? 0,
         tags: await this.getPostTags(post.id),
       }))
     );
@@ -222,6 +226,8 @@ export class PostgresAdapter implements IDatabase {
       viewCount: post.viewCount ?? 0,
       pinned: post.pinned,
       publishAt: this.ts(post.publishAt),
+      seriesSlug: post.seriesSlug || null,
+      seriesOrder: post.seriesOrder ?? 0,
       tags: await this.getPostTags(post.id),
     };
   }
@@ -239,6 +245,8 @@ export class PostgresAdapter implements IDatabase {
         listed: data.listed ?? true,
         pinned: data.pinned ?? false,
         publishAt: data.publishAt ? sql`${data.publishAt}::timestamptz` : null,
+        seriesSlug: data.seriesSlug || null,
+        seriesOrder: data.seriesOrder ?? 0,
       })
       .returning();
 
@@ -260,6 +268,8 @@ export class PostgresAdapter implements IDatabase {
       viewCount: 0,
       pinned: newPost.pinned,
       publishAt: this.ts(newPost.publishAt),
+      seriesSlug: newPost.seriesSlug || null,
+      seriesOrder: newPost.seriesOrder ?? 0,
     };
   }
 
@@ -284,6 +294,8 @@ export class PostgresAdapter implements IDatabase {
         ...(data.listed !== undefined && { listed: data.listed }),
         ...(data.pinned !== undefined && { pinned: data.pinned }),
         ...(data.publishAt !== undefined && { publishAt: data.publishAt ? sql`${data.publishAt}::timestamptz` : null }),
+        ...(data.seriesSlug !== undefined && { seriesSlug: data.seriesSlug }),
+        ...(data.seriesOrder !== undefined && { seriesOrder: data.seriesOrder }),
         updatedAt: sql`NOW()`,
       })
       .where(eq(pgPosts.id, existing.id))
@@ -307,6 +319,8 @@ export class PostgresAdapter implements IDatabase {
       viewCount: updated.viewCount ?? 0,
       pinned: updated.pinned,
       publishAt: this.ts(updated.publishAt),
+      seriesSlug: updated.seriesSlug || null,
+      seriesOrder: updated.seriesOrder ?? 0,
     };
   }
 
@@ -780,5 +794,14 @@ export class PostgresAdapter implements IDatabase {
       WHERE p.slug = ${postSlug} AND c.approved = true
     `;
     return row?.count ?? 0;
+  }
+
+  async getSeriesPosts(seriesSlug: string): Promise<{ slug: string; title: string; seriesOrder: number }[]> {
+    const rows = await this.client`
+      SELECT slug, title, series_order FROM posts
+      WHERE series_slug = ${seriesSlug} AND published = true
+      ORDER BY series_order ASC
+    `;
+    return rows.map(r => ({ slug: r.slug as string, title: r.title as string, seriesOrder: (r.series_order as number) ?? 0 }));
   }
 }

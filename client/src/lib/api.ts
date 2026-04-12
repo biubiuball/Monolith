@@ -14,6 +14,7 @@ export type PostMeta = {
   tags: string[];
   pinned: boolean;
   publishAt: string | null;
+  seriesSlug: string | null;
 };
 
 export type Post = PostMeta & {
@@ -22,6 +23,7 @@ export type Post = PostMeta & {
   listed: boolean;
   updatedAt: string;
   viewCount: number;
+  seriesOrder: number;
 };
 
 /* ── 公开 API ──────────────────────────────── */
@@ -40,6 +42,14 @@ export async function fetchPost(slug: string): Promise<Post> {
 export async function fetchTags(): Promise<{ id: number; name: string }[]> {
   const res = await fetch(`${API_BASE}/api/tags`);
   if (!res.ok) throw new Error("获取标签失败");
+  return res.json();
+}
+
+export type SeriesPost = { slug: string; title: string; seriesOrder: number };
+
+export async function fetchSeriesPosts(seriesSlug: string): Promise<SeriesPost[]> {
+  const res = await fetch(`${API_BASE}/api/series/${seriesSlug}`);
+  if (!res.ok) return [];
   return res.json();
 }
 

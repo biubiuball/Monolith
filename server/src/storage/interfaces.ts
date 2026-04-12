@@ -20,6 +20,8 @@ export type Post = {
   viewCount: number;
   pinned: boolean;
   publishAt: string | null;
+  seriesSlug: string | null;
+  seriesOrder: number;
 };
 
 export type PostSummary = {
@@ -32,6 +34,7 @@ export type PostSummary = {
   tags: string[];
   pinned: boolean;
   publishAt: string | null;
+  seriesSlug: string | null;
 };
 
 export type Tag = {
@@ -69,6 +72,8 @@ export type CreatePostInput = {
   tags?: string[];
   pinned?: boolean;
   publishAt?: string | null;
+  seriesSlug?: string | null;
+  seriesOrder?: number;
 };
 
 export type UpdatePostInput = {
@@ -82,6 +87,8 @@ export type UpdatePostInput = {
   tags?: string[];
   pinned?: boolean;
   publishAt?: string | null;
+  seriesSlug?: string | null;
+  seriesOrder?: number;
 };
 
 export type UpsertPageInput = {
@@ -192,6 +199,9 @@ export interface IDatabase {
   approveComment(id: number): Promise<boolean>;
   deleteComment(id: number): Promise<boolean>;
   getCommentCount(postSlug: string): Promise<number>;
+
+  /* 系列 */
+  getSeriesPosts(seriesSlug: string): Promise<{ slug: string; title: string; seriesOrder: number }[]>;
 }
 
 /* ── 对象存储抽象接口 ─────────────────────── */

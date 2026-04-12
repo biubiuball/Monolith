@@ -10,6 +10,7 @@ import { TableOfContents, ReadingProgressBar } from "@/components/toc";
 import { SeoHead } from "@/components/seo-head";
 import { CommentsSection } from "@/components/comments";
 import { RelatedPosts } from "@/components/related-posts";
+import { SeriesNav } from "@/components/series-nav";
 
 function formatDate(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString("zh-CN", { year: "numeric", month: "long", day: "numeric" });
@@ -144,6 +145,11 @@ export function PostPage() {
             </Link>
             <span className="text-[12px] text-muted-foreground/40">发布于 {formatDate(post.createdAt)}</span>
           </div>
+
+          {/* 系列导航 */}
+          {post.seriesSlug && (
+            <SeriesNav seriesSlug={post.seriesSlug} currentSlug={post.slug} />
+          )}
 
           {/* 相关推荐 */}
           <RelatedPosts currentSlug={post.slug} currentTags={post.tags} />

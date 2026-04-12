@@ -21,6 +21,8 @@ export const pgPosts = pgTable("posts", {
   viewCount: integer("view_count").notNull().default(0),
   pinned: boolean("pinned").notNull().default(false),
   publishAt: timestamp("publish_at", { withTimezone: true }),
+  seriesSlug: text("series_slug"),
+  seriesOrder: integer("series_order").notNull().default(0),
 });
 
 /* ── 标签表 ────────────────────────────────── */

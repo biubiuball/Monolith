@@ -153,6 +153,7 @@ export class TursoAdapter implements IDatabase {
         createdAt: posts.createdAt,
         pinned: posts.pinned,
         publishAt: posts.publishAt,
+        seriesSlug: posts.seriesSlug,
       })
       .from(posts)
       .where(
@@ -171,6 +172,7 @@ export class TursoAdapter implements IDatabase {
         tags: await this.getPostTags(post.id),
         pinned: post.pinned,
         publishAt: post.publishAt,
+        seriesSlug: post.seriesSlug || null,
       }))
     );
   }
@@ -196,6 +198,8 @@ export class TursoAdapter implements IDatabase {
         viewCount: post.viewCount ?? 0,
         pinned: post.pinned,
         publishAt: post.publishAt,
+        seriesSlug: post.seriesSlug || null,
+        seriesOrder: post.seriesOrder ?? 0,
         tags: await this.getPostTags(post.id),
       }))
     );
@@ -224,6 +228,8 @@ export class TursoAdapter implements IDatabase {
       viewCount: post.viewCount ?? 0,
       pinned: post.pinned,
       publishAt: post.publishAt,
+      seriesSlug: post.seriesSlug || null,
+      seriesOrder: post.seriesOrder ?? 0,
       tags: await this.getPostTags(post.id),
     };
   }
@@ -241,6 +247,8 @@ export class TursoAdapter implements IDatabase {
         listed: data.listed ?? true,
         pinned: data.pinned ?? false,
         publishAt: data.publishAt || null,
+        seriesSlug: data.seriesSlug || null,
+        seriesOrder: data.seriesOrder ?? 0,
       })
       .returning();
 
@@ -262,6 +270,8 @@ export class TursoAdapter implements IDatabase {
       viewCount: 0,
       pinned: newPost.pinned,
       publishAt: newPost.publishAt,
+      seriesSlug: newPost.seriesSlug || null,
+      seriesOrder: newPost.seriesOrder ?? 0,
     };
   }
 
@@ -286,6 +296,8 @@ export class TursoAdapter implements IDatabase {
         ...(data.listed !== undefined && { listed: data.listed }),
         ...(data.pinned !== undefined && { pinned: data.pinned }),
         ...(data.publishAt !== undefined && { publishAt: data.publishAt }),
+        ...(data.seriesSlug !== undefined && { seriesSlug: data.seriesSlug }),
+        ...(data.seriesOrder !== undefined && { seriesOrder: data.seriesOrder }),
         updatedAt: sql`datetime('now')`,
       })
       .where(eq(posts.id, existing.id))
@@ -309,6 +321,8 @@ export class TursoAdapter implements IDatabase {
       viewCount: updated.viewCount ?? 0,
       pinned: updated.pinned,
       publishAt: updated.publishAt,
+      seriesSlug: updated.seriesSlug || null,
+      seriesOrder: updated.seriesOrder ?? 0,
     };
   }
 
@@ -778,5 +792,14 @@ export class TursoAdapter implements IDatabase {
           WHERE p.slug = ${postSlug} AND c.approved = 1`
     );
     return (result.rows?.[0] as unknown as { count: number } | undefined)?.count ?? 0;
+  }
+
+  async getSeriesPosts(seriesSlug: string): Promise<{ slug: string; title: string; seriesOrder: number }[]> {
+    const rows = await this.db
+      .select({ slug: posts.slug, title: posts.title, seriesOrder: posts.seriesOrder })
+      .from(posts)
+      .where(sql`${posts.seriesSlug} = ${seriesSlug} AND ${posts.published} = 1`)
+      .orderBy(posts.seriesOrder);
+    return rows.map(r => ({ slug: r.slug, title: r.title, seriesOrder: r.seriesOrder ?? 0 }));
   }
 }
