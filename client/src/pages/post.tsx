@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import { useParams } from "wouter";
 import { Link } from "wouter";
 import { Badge } from "@/components/ui/badge";
@@ -42,6 +42,38 @@ export function PostPage() {
     if (!post) return "";
     return renderMarkdown(post.content);
   }, [post]);
+
+  // 图片渐进淡入（Intersection Observer）
+  const contentRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!contentRef.current) return;
+    const imgs = contentRef.current.querySelectorAll<HTMLImageElement>("img[data-lazy-img]");
+    if (imgs.length === 0) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const img = entry.target as HTMLImageElement;
+            img.classList.add("lazy-img--loaded");
+            observer.unobserve(img);
+          }
+        });
+      },
+      { rootMargin: "100px", threshold: 0.01 }
+    );
+
+    imgs.forEach((img) => {
+      if (img.complete) {
+        img.classList.add("lazy-img--loaded");
+      } else {
+        img.addEventListener("load", () => img.classList.add("lazy-img--loaded"), { once: true });
+        observer.observe(img);
+      }
+    });
+
+    return () => observer.disconnect();
+  }, [htmlContent]);
 
   if (loading) {
     return (
@@ -116,6 +148,7 @@ export function PostPage() {
 
           {/* 文章正文，同时处理代码块复制逻辑 */}
           <div 
+            ref={contentRef}
             className="prose-monolith animate-fade-in delay-3" 
             dangerouslySetInnerHTML={{ __html: htmlContent }} 
             onClick={(e) => {

@@ -191,8 +191,8 @@ renderer.image = ({ href, title, text }: { href: string; title?: string | null; 
     </figure>`;
   }
 
-  // 默认图片渲染
-  return `<figure class="md-figure"><img src="${href}" alt="${escapeHtml(text)}" loading="lazy" decoding="async"${titleAttr}/>${text ? `<figcaption>${escapeHtml(text)}</figcaption>` : ""}</figure>`;
+  // 默认图片渲染 — 懒加载 + 渐进淡入
+  return `<figure class="md-figure"><img src="${href}" alt="${escapeHtml(text)}" loading="lazy" decoding="async" data-lazy-img${titleAttr} class="lazy-img"/>${text ? `<figcaption>${escapeHtml(text)}</figcaption>` : ""}</figure>`;
 };
 
 // 表格：响应式包裹
@@ -236,7 +236,7 @@ export function renderMarkdown(md: string): string {
     ADD_ATTR: [
       "allow", "allowfullscreen", "frameborder", "scrolling",
       "playsinline", "preload", "controls",
-      "loading", "decoding",
+      "loading", "decoding", "data-lazy-img",
       "target", "rel",
     ],
   });

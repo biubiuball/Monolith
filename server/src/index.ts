@@ -670,6 +670,13 @@ app.get("/cdn/:key{.+}", async (c) => {
   const headers = new Headers();
   object.writeHeaders(headers);
 
+  // 图片：长缓存 + Vary 允许 CF 边缘按格式缓存
+  const isImage = /\.(jpe?g|png|gif|webp|svg|avif|bmp)$/i.test(key);
+  if (isImage) {
+    headers.set("Cache-Control", "public, max-age=31536000, immutable");
+    headers.set("Vary", "Accept");
+  }
+
   return new Response(object.body, { headers });
 });
 
