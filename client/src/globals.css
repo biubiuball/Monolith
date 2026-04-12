@@ -1450,3 +1450,81 @@
   opacity: 1;
   transform: translateY(0);
 }
+
+/* ── 阅读模式 ─────────────────────────────── */
+.reading-mode header,
+.reading-mode footer,
+.reading-mode .reading-progress-bar,
+.reading-mode .toc-desktop,
+.reading-mode .toc-mobile,
+.reading-mode .reading-mode-toggle {
+  display: none !important;
+}
+
+.reading-mode .post-layout {
+  max-width: 780px;
+  display: block;
+}
+
+.reading-mode .post-content {
+  max-width: 100%;
+  grid-column: auto;
+}
+
+.reading-mode .prose-monolith {
+  font-size: 17px;
+  line-height: 2;
+  letter-spacing: 0.01em;
+}
+
+/* 阅读模式浮动退出按钮 */
+.reading-mode-exit-fab {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid oklch(0.3 0 0 / 0.3);
+  background: oklch(0.15 0 0 / 0.85);
+  color: oklch(0.7 0 0);
+  cursor: pointer;
+  backdrop-filter: blur(12px);
+  transition: all 0.25s ease;
+  animation: reading-fab-in 0.3s ease-out;
+}
+
+.reading-mode-exit-fab:hover {
+  background: oklch(0.2 0 0 / 0.95);
+  color: oklch(0.95 0 0);
+  transform: scale(1.08);
+  border-color: oklch(0.5 0 0 / 0.3);
+}
+
+@keyframes reading-fab-in {
+  from {
+    opacity: 0;
+    transform: scale(0.6) rotate(-90deg);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+/* 亮色模式阅读退出按钮 */
+:root:not(.dark) .reading-mode-exit-fab {
+  border-color: oklch(0.8 0 0 / 0.3);
+  background: oklch(0.98 0 0 / 0.9);
+  color: oklch(0.4 0 0);
+}
+
+:root:not(.dark) .reading-mode-exit-fab:hover {
+  background: oklch(0.95 0 0 / 0.95);
+  color: oklch(0.15 0 0);
+  border-color: oklch(0.6 0 0 / 0.3);
+}

@@ -1,11 +1,11 @@
-import { useEffect, useState, useMemo, useRef } from "react";
+import { useEffect, useState, useMemo, useRef, useCallback } from "react";
 import { useParams } from "wouter";
 import { Link } from "wouter";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { fetchPost, type Post } from "@/lib/api";
 import { renderMarkdown, extractHeadings } from "@/lib/markdown";
-import { ArrowLeft, Eye } from "lucide-react";
+import { ArrowLeft, Eye, BookOpen, X } from "lucide-react";
 import { TableOfContents, ReadingProgressBar } from "@/components/toc";
 import { SeoHead } from "@/components/seo-head";
 import { CommentsSection } from "@/components/comments";
@@ -22,6 +22,28 @@ export function PostPage() {
   const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [readingMode, setReadingMode] = useState(false);
+
+  // 阅读模式切换
+  const toggleReadingMode = useCallback(() => {
+    setReadingMode((prev) => {
+      const next = !prev;
+      document.documentElement.classList.toggle("reading-mode", next);
+      return next;
+    });
+  }, []);
+
+  // ESC 退出阅读模式
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && readingMode) toggleReadingMode();
+    };
+    window.addEventListener("keydown", handleKey);
+    return () => {
+      window.removeEventListener("keydown", handleKey);
+      document.documentElement.classList.remove("reading-mode");
+    };
+  }, [readingMode, toggleReadingMode]);
 
   useEffect(() => {
     if (!params.slug) return;
@@ -124,6 +146,16 @@ export function PostPage() {
             <ArrowLeft className="h-[14px] w-[14px]" />返回首页
           </Link>
 
+          {/* 阅读模式按钮 */}
+          <button
+            onClick={toggleReadingMode}
+            className="reading-mode-toggle mb-[24px] inline-flex items-center gap-[6px] rounded-full border border-border/30 bg-card/40 px-[14px] py-[6px] text-[12px] text-muted-foreground/60 transition-all duration-300 hover:bg-card hover:text-foreground hover:border-border/60 animate-fade-in"
+            title="切换阅读模式 (ESC 退出)"
+          >
+            <BookOpen className="h-[14px] w-[14px]" />
+            {readingMode ? "退出阅读模式" : "阅读模式"}
+          </button>
+
           <header className="mb-[32px] animate-fade-in-up delay-1">
             <div className={`mb-[24px] h-[3px] w-[60px] rounded-full bg-gradient-to-r ${post.coverColor || "from-gray-500/20 to-gray-600/20"}`} />
             <div className="mb-[16px] flex flex-wrap items-center gap-[8px]">
@@ -200,6 +232,17 @@ export function PostPage() {
           <TableOfContents headings={headings} />
         )}
       </div>
+
+      {/* 阅读模式浮动退出按钮 */}
+      {readingMode && (
+        <button
+          onClick={toggleReadingMode}
+          className="reading-mode-exit-fab"
+          title="退出阅读模式 (ESC)"
+        >
+          <X className="h-[16px] w-[16px]" />
+        </button>
+      )}
     </>
   );
 }
