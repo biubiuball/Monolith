@@ -1548,80 +1548,87 @@
   transform: translateY(0);
 }
 
-  /* ── 阅读模式 ─────────────────────────────── */
+  /* ── 阅读模式与控制面板 ─────────────────────────────── */
   .reading-mode .app-header,
   .reading-mode .app-footer,
-.reading-mode .reading-progress-bar,
-.reading-mode .toc-desktop,
-.reading-mode .toc-mobile,
-.reading-mode .reading-mode-toggle {
-  display: none !important;
-}
-
-.reading-mode .post-layout {
-  max-width: 780px;
-  display: block;
-}
-
-.reading-mode .post-content {
-  max-width: 100%;
-  grid-column: auto;
-}
-
-.reading-mode .prose-monolith {
-  font-size: 17px;
-  line-height: 2;
-  letter-spacing: 0.01em;
-}
-
-/* 阅读模式浮动退出按钮 */
-.reading-mode-exit-fab {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  z-index: 9999;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  border: 1px solid oklch(0.3 0 0 / 0.3);
-  background: oklch(0.15 0 0 / 0.85);
-  color: oklch(0.7 0 0);
-  cursor: pointer;
-  backdrop-filter: blur(12px);
-  transition: all 0.25s ease;
-  animation: reading-fab-in 0.3s ease-out;
-}
-
-.reading-mode-exit-fab:hover {
-  background: oklch(0.2 0 0 / 0.95);
-  color: oklch(0.95 0 0);
-  transform: scale(1.08);
-  border-color: oklch(0.5 0 0 / 0.3);
-}
-
-@keyframes reading-fab-in {
-  from {
-    opacity: 0;
-    transform: scale(0.6) rotate(-90deg);
+  .reading-mode .reading-progress-bar,
+  .reading-mode .toc-desktop,
+  .reading-mode .toc-mobile,
+  .reading-mode .reading-mode-toggle {
+    display: none !important;
   }
-  to {
-    opacity: 1;
-    transform: scale(1) rotate(0deg);
+
+  /* 动态宽度 */
+  .reading-mode .post-layout {
+    max-width: var(--rm-width, 780px) !important;
+    display: block;
+    transition: max-width 0.3s ease;
   }
-}
 
-/* 亮色模式阅读退出按钮 */
-[data-theme="light"] .reading-mode-exit-fab {
-  border-color: oklch(0.8 0 0 / 0.3);
-  background: oklch(0.98 0 0 / 0.9);
-  color: oklch(0.4 0 0);
-}
+  .reading-mode .post-content {
+    max-width: 100%;
+    grid-column: auto;
+  }
 
-[data-theme="light"] .reading-mode-exit-fab:hover {
-  background: oklch(0.95 0 0 / 0.95);
-  color: oklch(0.15 0 0);
-  border-color: oklch(0.6 0 0 / 0.3);
-}
+  /* 动态字号、行距、字体 */
+  .reading-mode .prose-monolith {
+    font-family: var(--rm-font, inherit);
+    font-size: var(--rm-size, 17px);
+    line-height: var(--rm-line-height, 2.0);
+    letter-spacing: 0.01em;
+    transition: font-size 0.2s ease, line-height 0.2s ease;
+  }
+  
+  .reading-mode .prose-monolith p, 
+  .reading-mode .prose-monolith li,
+  .reading-mode .prose-monolith blockquote {
+    color: inherit; /* 让文字颜色跟随外层被覆盖的颜色 */
+  }
+
+  /* --- 阅读主题覆写 --- */
+  
+  html[data-reading-theme="sepia"] body {
+    background-color: #f4ece3 !important;
+    color: #5b4a3a !important;
+  }
+  html[data-reading-theme="sepia"] .prose-monolith h1,
+  html[data-reading-theme="sepia"] .prose-monolith h2,
+  html[data-reading-theme="sepia"] .prose-monolith h3,
+  html[data-reading-theme="sepia"] .prose-monolith h4 {
+    color: #4a3c31 !important;
+  }
+  html[data-reading-theme="sepia"] .prose-monolith strong {
+    color: #3d3025 !important;
+  }
+  html[data-reading-theme="sepia"] .prose-monolith a {
+    color: #a46d3e !important;
+    box-shadow: 0 1px 0 0 rgba(164, 109, 62, 0.4) !important;
+  }
+
+  html[data-reading-theme="dark"] body {
+    background-color: #1a1a1c !important;
+    color: #e0e0e0 !important;
+  }
+  html[data-reading-theme="dark"] .prose-monolith h1,
+  html[data-reading-theme="dark"] .prose-monolith h2,
+  html[data-reading-theme="dark"] .prose-monolith h3,
+  html[data-reading-theme="dark"] .prose-monolith h4 {
+    color: #ffffff !important;
+  }
+  html[data-reading-theme="dark"] .prose-monolith strong {
+    color: #ffffff !important;
+  }
+  
+  html[data-reading-theme="light"] body {
+    background-color: #f8f9fa !important;
+    color: #333333 !important;
+  }
+  html[data-reading-theme="light"] .prose-monolith h1,
+  html[data-reading-theme="light"] .prose-monolith h2,
+  html[data-reading-theme="light"] .prose-monolith h3,
+  html[data-reading-theme="light"] .prose-monolith h4 {
+    color: #111111 !important;
+  }
+  html[data-reading-theme="light"] .prose-monolith strong {
+    color: #000000 !important;
+  }

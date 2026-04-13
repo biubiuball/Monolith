@@ -6,6 +6,7 @@ import { Separator } from "@/components/ui/separator";
 import { fetchPost, type Post } from "@/lib/api";
 import { renderMarkdown, extractHeadings } from "@/lib/markdown";
 import { ArrowLeft, Eye, BookOpen, X } from "lucide-react";
+import { ReadingControls, useReadingPreferences } from "@/components/reading-controls";
 import { TableOfContents, ReadingProgressBar } from "@/components/toc";
 import { SeoHead } from "@/components/seo-head";
 import { CommentsSection } from "@/components/comments";
@@ -24,27 +25,39 @@ export function PostPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [readingMode, setReadingMode] = useState(false);
+  const { preferences, updatePreference } = useReadingPreferences();
 
   // 阅读模式切换
   const toggleReadingMode = useCallback(() => {
-    setReadingMode((prev) => {
-      const next = !prev;
-      document.documentElement.classList.toggle("reading-mode", next);
-      return next;
-    });
+    setReadingMode((prev) => !prev);
   }, []);
 
   // ESC 退出阅读模式
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && readingMode) toggleReadingMode();
+      if (e.key === "Escape" && readingMode) setReadingMode(false);
     };
     window.addEventListener("keydown", handleKey);
     return () => {
       window.removeEventListener("keydown", handleKey);
-      document.documentElement.classList.remove("reading-mode");
     };
-  }, [readingMode, toggleReadingMode]);
+  }, [readingMode]);
+
+  // 处理阅读模式样式与属性
+  useEffect(() => {
+    document.documentElement.classList.toggle("reading-mode", readingMode);
+    
+    if (readingMode && preferences.theme !== "system") {
+      document.documentElement.setAttribute("data-reading-theme", preferences.theme);
+    } else {
+      document.documentElement.removeAttribute("data-reading-theme");
+    }
+
+    return () => {
+      document.documentElement.classList.remove("reading-mode");
+      document.documentElement.removeAttribute("data-reading-theme");
+    };
+  }, [readingMode, preferences.theme]);
 
   useEffect(() => {
     if (!params.slug) return;
@@ -156,21 +169,29 @@ export function PostPage() {
       <ReadingProgressBar />
 
       {/* 三栏布局容器：文章 + TOC 侧边栏 */}
-      <div className="post-layout mx-auto w-full max-w-[1100px] px-[16px] lg:px-[24px]">
+      <div 
+        className="post-layout mx-auto w-full max-w-[1100px] px-[16px] lg:px-[24px]"
+        style={readingMode ? {
+          "--rm-width": `${preferences.maxWidth}px`,
+          "--rm-font": preferences.fontFamily === "serif" ? "ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif" : "ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
+          "--rm-size": `${preferences.fontSize}px`,
+          "--rm-line-height": preferences.lineHeight,
+        } as React.CSSProperties : undefined}
+      >
         {/* 主内容区 */}
         <article className="post-content py-[32px] lg:py-[56px]">
           <Link href="/" className="mb-[32px] inline-flex items-center gap-[6px] text-[13px] text-muted-foreground/60 transition-all duration-200 hover:text-foreground hover:-translate-x-[2px] animate-fade-in">
             <ArrowLeft className="h-[14px] w-[14px]" />返回首页
           </Link>
 
-          {/* 阅读模式按钮 */}
+          {/* 进入阅读模式按钮 */}
           <button
             onClick={toggleReadingMode}
             className="reading-mode-toggle mb-[24px] inline-flex items-center gap-[6px] rounded-full border border-border/30 bg-card/40 px-[14px] py-[6px] text-[12px] text-muted-foreground/60 transition-all duration-300 hover:bg-card hover:text-foreground hover:border-border/60 animate-fade-in"
-            title="切换阅读模式 (ESC 退出)"
+            title="进入专注阅读模式"
           >
             <BookOpen className="h-[14px] w-[14px]" />
-            {readingMode ? "退出阅读模式" : "阅读模式"}
+            阅读模式
           </button>
 
           <header className="mb-[32px] animate-fade-in-up delay-1">
@@ -254,17 +275,13 @@ export function PostPage() {
           <TableOfContents headings={headings} />
         )}
       </div>
-
-      {/* 阅读模式浮动退出按钮 */}
-      {readingMode && (
-        <button
-          onClick={toggleReadingMode}
-          className="reading-mode-exit-fab"
-          title="退出阅读模式 (ESC)"
-        >
-          <X className="h-[16px] w-[16px]" />
-        </button>
-      )}
+      {/* 阅读模式控制面板 */}
+      <ReadingControls
+        isActive={readingMode}
+        onClose={() => setReadingMode(false)}
+        preferences={preferences}
+        updatePreference={updatePreference}
+      />
     </>
   );
 }
