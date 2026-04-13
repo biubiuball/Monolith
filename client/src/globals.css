@@ -405,13 +405,13 @@
 /* 代码块 */
 .prose-monolith pre {
   margin: 20px 0;
-  padding: 20px;
+  padding: 16px 20px;
   border-radius: 8px;
   background: oklch(0.15 0.006 220) !important;
   border: 1px solid oklch(1 0 0 / 6%);
   overflow-x: auto;
   font-size: 13px;
-  line-height: 1.7;
+  line-height: 1.85;
   font-family: ui-monospace, "SF Mono", "Cascadia Code", "Fira Code", Consolas, monospace;
 }
 
@@ -468,26 +468,69 @@
   background: oklch(1 0 0 / 2%);
 }
 
-/* 代码块语言标签 */
-.prose-monolith pre {
-  position: relative;
+/* 代码块顶部信息栏（语言标签 + 复制按钮） */
+.prose-monolith .code-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 12px 6px 16px;
+  background: oklch(0.13 0.006 220);
+  border: 1px solid oklch(1 0 0 / 6%);
+  border-bottom: none;
+  border-radius: 8px 8px 0 0;
+}
+
+.prose-monolith .has-header > pre {
+  border-radius: 0 0 8px 8px;
+  margin-top: 0;
 }
 
 .prose-monolith .code-lang {
-  position: absolute;
-  top: 12px;
-  right: 42px;
-  font-size: 10px;
+  font-size: 11px;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: oklch(0.45 0 0);
+  letter-spacing: 0.08em;
+  font-weight: 500;
+  color: oklch(0.5 0.02 220);
   pointer-events: none;
   user-select: none;
+  font-family: ui-monospace, "SF Mono", "Cascadia Code", "Fira Code", Consolas, monospace;
 }
 
-/* 有标题时语言标签位置调整 */
-.prose-monolith .has-title .code-lang {
-  top: 50px;
+/* 复制按钮（信息栏内） */
+.prose-monolith .copy-code-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 8px;
+  gap: 5px;
+  border-radius: 6px;
+  border: 1px solid oklch(1 0 0 / 8%);
+  background: oklch(1 0 0 / 4%);
+  color: oklch(0.45 0 0);
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  opacity: 0.6;
+}
+
+.prose-monolith .copy-code-btn:hover {
+  opacity: 1;
+  color: oklch(0.7 0 0);
+  background: oklch(1 0 0 / 8%);
+  border-color: oklch(1 0 0 / 15%);
+}
+
+.prose-monolith .copy-code-btn svg {
+  flex-shrink: 0;
+}
+
+/* 有标题栏时，复制按钮放标题栏右侧 */
+.prose-monolith .has-title .code-header {
+  display: none;
+}
+
+.prose-monolith .code-title-bar .copy-code-btn {
+  margin-left: auto;
 }
 
 /* 代码块标题栏 */
@@ -720,13 +763,23 @@
   color: oklch(0.35 0.08 250);
   border-color: oklch(0 0 0 / 8%);
 }
-:root[data-theme="light"] .prose-monolith .code-lang {
-  color: oklch(0.55 0 0);
-}
+
 :root[data-theme="light"] .prose-monolith .copy-code-btn {
   color: oklch(0.45 0 0);
   background: oklch(0.93 0 0);
   border-color: oklch(0 0 0 / 10%);
+}
+:root[data-theme="light"] .prose-monolith .copy-code-btn:hover {
+  color: oklch(0.25 0 0);
+  background: oklch(0.90 0 0);
+  border-color: oklch(0 0 0 / 15%);
+}
+:root[data-theme="light"] .prose-monolith .code-header {
+  background: oklch(0.93 0.002 250);
+  border-color: oklch(0 0 0 / 8%);
+}
+:root[data-theme="light"] .prose-monolith .code-lang {
+  color: oklch(0.45 0.02 250);
 }
 :root[data-theme="light"] .prose-monolith .code-title-bar {
   background: oklch(0.93 0.002 250);

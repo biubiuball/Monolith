@@ -141,25 +141,31 @@ renderer.code = ({ text, lang }: { text: string; lang?: string }) => {
     return `<span class="code-line${hlClass}${diffClass}">${numHtml}<span class="line-content">${line}</span></span>`;
   }).join("\n");
 
-  // 标题栏
-  const titleBar = title
-    ? `<div class="code-title-bar"><span class="code-title-dots"><span></span><span></span><span></span></span><span class="code-title-text">${escapeHtml(title)}</span></div>`
-    : "";
 
-  const langLabel = language ? `<span class="code-lang">${language}</span>` : "";
+  const langLabel = language ? `<span class="code-lang">${language}</span>` : `<span class="code-lang">code</span>`;
 
   const copyIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>`;
+
+  const copyBtn = `<button class="copy-code-btn" aria-label="复制代码">${copyIcon}</button>`;
 
   const hasTitle = title ? " has-title" : "";
   const hasLineNums = showLineNumbers ? " has-line-numbers" : "";
 
-  return `<div class="code-block-wrapper relative group${hasTitle}${hasLineNums}">
-    ${titleBar}
-    <button class="copy-code-btn absolute ${title ? "top-[42px]" : "top-2"} right-2 flex items-center justify-center p-1.5 rounded-md border border-border/40 bg-card/60 text-muted-foreground transition-all duration-200 hover:text-foreground hover:bg-card hover:border-border/80 opacity-40 hover:opacity-100 group-hover:opacity-100 z-10" aria-label="复制代码">
-      ${copyIcon}
-    </button>
-    <pre class="hljs">${langLabel}<code class="hljs language-${language || "text"}">${codeLines}</code></pre>
-  </div>`;
+  if (title) {
+    // 有标题时：标题栏（macOS 圆点 + 标题 + 复制按钮）
+    const titleBar = `<div class="code-title-bar"><span class="code-title-dots"><span></span><span></span><span></span></span><span class="code-title-text">${escapeHtml(title)}</span>${copyBtn}</div>`;
+    return `<div class="code-block-wrapper${hasTitle}${hasLineNums}">
+      ${titleBar}
+      <pre class="hljs"><code class="hljs language-${language || "text"}">${codeLines}</code></pre>
+    </div>`;
+  } else {
+    // 无标题时：顶部信息栏（语言标签 + 复制按钮）
+    const header = `<div class="code-header">${langLabel}${copyBtn}</div>`;
+    return `<div class="code-block-wrapper has-header${hasLineNums}">
+      ${header}
+      <pre class="hljs"><code class="hljs language-${language || "text"}">${codeLines}</code></pre>
+    </div>`;
+  }
 };
 
 // 图片/视频：懒加载 + 圆角 + 视频解析
