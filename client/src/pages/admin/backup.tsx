@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useLocation } from "wouter";
 import { checkAuth, getToken } from "@/lib/api";
-import { ArrowLeft, HardDrive, Cloud, Globe, Download, Trash2, RefreshCw, Shield, Clock, Upload, Eye, FileUp, ChevronDown, ChevronUp, ImageDown, Database } from "lucide-react";
+import { ArrowLeft, HardDrive, Cloud, Globe, Download, Trash2, RefreshCw, Shield, Clock, Upload, Eye, FileUp, ChevronDown, ChevronUp, ImageDown, Database, AlertTriangle } from "lucide-react";
+import { platforms, type ImportResult, type PlatformInfo } from "@/lib/importers";
 import { Link } from "wouter";
 
 type R2Backup = { key: string; name: string; size: number; uploaded: string };
@@ -38,14 +39,53 @@ export function AdminBackup() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [webdavConfig, setWebdavConfig] = useState({ url: "", username: "", password: "", path: "/monolith-backups" });
 
-  // Halo 迁移状态
-  const haloFileRef = useRef<HTMLInputElement>(null);
-  const [haloPreview, setHaloPreview] = useState<{ postCount: number; tagCount: number; categoryCount: number; commentCount: number; postTitles: { title: string; slug: string }[]; tagNames: string[] } | null>(null);
-  const [haloRawData, setHaloRawData] = useState<any>(null);
-  const [haloImporting, setHaloImporting] = useState(false);
-  const [haloMode, setHaloMode] = useState<"merge" | "overwrite">("merge");
+  // 通用多平台迁移状态
+  const migrationFileRef = useRef<HTMLInputElement>(null);
+  const [selectedPlatform, setSelectedPlatform] = useState<PlatformInfo | null>(null);
+  const [migrationResult, setMigrationResult] = useState<ImportResult | null>(null);
+  const [migrationImporting, setMigrationImporting] = useState(false);
+  const [migrationMode, setMigrationMode] = useState<"merge" | "overwrite">("merge");
+  const [migrationParsing, setMigrationParsing] = useState(false);
   // 批量外链转本地
   const [localizing, setLocalizing] = useState(false);
+
+  // 处理平台文件上传 → 客户端解析 → 展示预览
+  const handleMigrationFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0 || !selectedPlatform) return;
+    setMigrationParsing(true);
+    try {
+      const result = await selectedPlatform.parse(Array.from(files));
+      setMigrationResult(result);
+    } catch (err: any) {
+      showMsg(err.message || `${selectedPlatform.name} 数据解析失败`, "error");
+    }
+    setMigrationParsing(false);
+    if (migrationFileRef.current) migrationFileRef.current.value = "";
+  };
+
+  // 确认导入 → 调用统一的 restore 后端接口
+  const handleMigrationImport = async () => {
+    if (!migrationResult || !selectedPlatform) return;
+    const { posts, tags, preview } = migrationResult;
+    if (!confirm(`确定导入 ${preview.postCount} 篇文章、${preview.tagCount} 个标签？\n模式: ${migrationMode === "merge" ? "合并（跳过已有）" : "覆盖（更新已有）"}`)) return;
+    setMigrationImporting(true);
+    try {
+      const res = await fetch("/api/admin/backup/restore", {
+        method: "POST",
+        headers: jsonHeaders,
+        body: JSON.stringify({ posts, tags, mode: migrationMode }),
+      });
+      const result = await res.json();
+      if (result.success) {
+        showMsg(`${selectedPlatform.name} 迁移完成：导入 ${result.imported.posts} 篇文章、${result.imported.tags} 个标签`, "success");
+        setMigrationResult(null);
+      } else {
+        showMsg(result.error || "导入失败", "error");
+      }
+    } catch { showMsg("导入请求失败", "error"); }
+    setMigrationImporting(false);
+  };
 
   useEffect(() => {
     document.title = "备份管理 | Monolith";
@@ -274,110 +314,128 @@ export function AdminBackup() {
         </div>
       </section>
 
-      {/* ─── Halo 数据迁移 ─── */}
+      {/* ─── 多平台数据迁移 ─── */}
       <section className="mb-[20px]">
         <SectionTitle icon={Database} title="数据迁移" />
         <div className="rounded-lg border border-border/25 bg-card/15 p-[16px] space-y-[12px]">
-          {/* Halo 导入 */}
+          {/* 平台选择网格 */}
           <div>
-            <div className="flex items-center justify-between mb-[6px]">
-              <div>
-                <p className="text-[13px] text-foreground">从 Halo 博客迁移</p>
-                <p className="text-[11px] text-muted-foreground/35 mt-[1px]">上传 Halo 1.x/2.x 导出的 JSON 文件，自动转换并导入</p>
-              </div>
-              <div className="flex items-center gap-[6px]">
-                <select value={haloMode} onChange={(e) => setHaloMode(e.target.value as "merge" | "overwrite")}
-                  className="h-[28px] rounded-md border border-border/25 bg-background/20 px-[8px] text-[11px] text-muted-foreground outline-none"
+            <p className="text-[11px] text-muted-foreground/35 mb-[8px]">选择来源平台，上传对应格式的导出文件即可一键迁移</p>
+            <div className="grid grid-cols-3 sm:grid-cols-6 gap-[6px]">
+              {platforms.map((p) => (
+                <button
+                  key={p.id}
+                  onClick={() => { setSelectedPlatform(p); setMigrationResult(null); }}
+                  className={`rounded-lg border p-[10px] text-center transition-all ${
+                    selectedPlatform?.id === p.id
+                      ? `border-${p.color}-500/40 bg-${p.color}-500/10`
+                      : "border-border/20 bg-card/5 hover:bg-card/15 hover:border-border/40"
+                  }`}
                 >
-                  <option value="merge">合并导入</option>
-                  <option value="overwrite">覆盖导入</option>
-                </select>
-                <input type="file" ref={haloFileRef} accept=".json" className="hidden" onChange={async (e) => {
-                  const file = e.target.files?.[0];
-                  if (!file) return;
-                  try {
-                    const text = await file.text();
-                    const data = JSON.parse(text);
-                    setHaloRawData(data);
-                    // 调用预览 API
-                    const res = await fetch("/api/admin/import/halo/preview", {
-                      method: "POST", headers: jsonHeaders, body: text,
-                    });
-                    const result = await res.json();
-                    if (result.success) {
-                      setHaloPreview({ ...result.preview, postTitles: result.postTitles, tagNames: result.tagNames });
-                    } else {
-                      showMsg(result.error || "解析失败", "error");
-                    }
-                  } catch { showMsg("文件解析失败，请确认是有效的 Halo JSON 导出文件", "error"); }
-                  if (haloFileRef.current) haloFileRef.current.value = "";
-                }} />
-                <button onClick={() => haloFileRef.current?.click()} disabled={haloImporting}
-                  className="inline-flex items-center gap-[4px] h-[28px] px-[10px] rounded-md bg-foreground text-background text-[11px] font-medium hover:opacity-90 disabled:opacity-50 transition-opacity"
-                >
-                  <Upload className="h-[10px] w-[10px]" />选择 Halo JSON
-                </button>
-              </div>
-            </div>
-
-            {/* Halo 预览结果 */}
-            {haloPreview && (
-              <div className="mt-[10px] rounded-md border border-border/20 bg-background/10 p-[12px] space-y-[8px]">
-                <div className="grid grid-cols-4 gap-[8px]">
-                  {[
-                    { label: "文章", value: haloPreview.postCount, color: "text-cyan-400" },
-                    { label: "标签", value: haloPreview.tagCount, color: "text-emerald-400" },
-                    { label: "分类", value: haloPreview.categoryCount, color: "text-amber-400" },
-                    { label: "评论", value: haloPreview.commentCount, color: "text-purple-400" },
-                  ].map((s) => (
-                    <div key={s.label} className="text-center">
-                      <div className={`text-[18px] font-bold ${s.color}`}>{s.value}</div>
-                      <div className="text-[10px] text-muted-foreground/30">{s.label}</div>
-                    </div>
-                  ))}
-                </div>
-                {haloPreview.postTitles.length > 0 && (
-                  <div>
-                    <p className="text-[10px] text-muted-foreground/30 mb-[4px]">文章列表（前 20 篇）：</p>
-                    <div className="max-h-[120px] overflow-y-auto space-y-[2px]">
-                      {haloPreview.postTitles.map((p, i) => (
-                        <div key={i} className="text-[11px] text-muted-foreground/50 truncate">· {p.title}</div>
-                      ))}
-                    </div>
+                  <div className={`text-[13px] font-semibold mb-[2px] ${
+                    selectedPlatform?.id === p.id ? `text-${p.color}-400` : "text-foreground/80"
+                  }`}>{p.name}</div>
+                  <div className="text-[9px] text-muted-foreground/30 leading-tight">
+                    {p.accept.replace(/\./g, "").toUpperCase()}
                   </div>
-                )}
-                {haloPreview.commentCount > 0 && (
-                  <p className="text-[10px] text-amber-400/60">⚠ 评论数据尚不支持迁移，仅导入文章和标签</p>
-                )}
-                <div className="flex justify-end gap-[6px] pt-[4px]">
-                  <button onClick={() => { setHaloPreview(null); setHaloRawData(null); }}
-                    className="h-[28px] px-[10px] rounded-md text-[11px] text-muted-foreground/50 hover:text-foreground border border-border/20 transition-colors"
-                  >取消</button>
-                  <button onClick={async () => {
-                    if (!haloRawData) return;
-                    if (!confirm(`确定导入 ${haloPreview.postCount} 篇文章、${haloPreview.tagCount} 个标签？\n模式: ${haloMode === "merge" ? "合并" : "覆盖"}`)) return;
-                    setHaloImporting(true);
-                    try {
-                      const res = await fetch("/api/admin/import/halo", {
-                        method: "POST", headers: jsonHeaders,
-                        body: JSON.stringify({ data: haloRawData, mode: haloMode }),
-                      });
-                      const result = await res.json();
-                      if (result.success) {
-                        showMsg(`Halo 迁移完成：导入 ${result.imported.posts} 篇文章、${result.imported.tags} 个标签`, "success");
-                        setHaloPreview(null); setHaloRawData(null);
-                      } else showMsg(result.error || "导入失败", "error");
-                    } catch { showMsg("导入请求失败", "error"); }
-                    setHaloImporting(false);
-                  }} disabled={haloImporting}
-                    className="inline-flex items-center gap-[4px] h-[28px] px-[12px] rounded-md bg-cyan-500 text-white text-[11px] font-medium hover:opacity-90 disabled:opacity-50 transition-opacity"
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* 选中平台后的上传面板 */}
+          {selectedPlatform && !migrationResult && (
+            <div className="rounded-md border border-border/20 bg-background/10 p-[12px] animate-fade-in">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-[13px] text-foreground">从 {selectedPlatform.name} 导入</p>
+                  <p className="text-[11px] text-muted-foreground/35 mt-[1px]">{selectedPlatform.description}</p>
+                </div>
+                <div className="flex items-center gap-[6px]">
+                  <select value={migrationMode} onChange={(e) => setMigrationMode(e.target.value as "merge" | "overwrite")}
+                    className="h-[28px] rounded-md border border-border/25 bg-background/20 px-[8px] text-[11px] text-muted-foreground outline-none"
                   >
-                    <Database className="h-[10px] w-[10px]" />{haloImporting ? "导入中..." : "确认导入"}
+                    <option value="merge">合并导入</option>
+                    <option value="overwrite">覆盖导入</option>
+                  </select>
+                  <input
+                    type="file"
+                    ref={migrationFileRef}
+                    accept={selectedPlatform.accept}
+                    multiple={selectedPlatform.multiple}
+                    className="hidden"
+                    onChange={handleMigrationFileChange}
+                  />
+                  <button onClick={() => migrationFileRef.current?.click()} disabled={migrationParsing}
+                    className="inline-flex items-center gap-[4px] h-[28px] px-[10px] rounded-md bg-foreground text-background text-[11px] font-medium hover:opacity-90 disabled:opacity-50 transition-opacity"
+                  >
+                    <Upload className="h-[10px] w-[10px]" />
+                    {migrationParsing ? "解析中..." : selectedPlatform.multiple ? "选择文件（多选）" : "选择文件"}
                   </button>
                 </div>
               </div>
-            )}
-          </div>
+            </div>
+          )}
+
+          {/* 解析预览结果 */}
+          {migrationResult && selectedPlatform && (
+            <div className="rounded-md border border-border/20 bg-background/10 p-[12px] space-y-[8px] animate-fade-in">
+              <div className="flex items-center gap-[6px] mb-[4px]">
+                <span className="text-[12px] font-medium text-foreground">{selectedPlatform.name} 数据预览</span>
+                <span className="text-[10px] text-muted-foreground/25">（尚未写入）</span>
+              </div>
+              <div className="grid grid-cols-4 gap-[8px]">
+                {[
+                  { label: "文章", value: migrationResult.preview.postCount, color: "text-cyan-400" },
+                  { label: "标签", value: migrationResult.preview.tagCount, color: "text-emerald-400" },
+                  { label: "分类", value: migrationResult.preview.categoryCount, color: "text-amber-400" },
+                  { label: "评论", value: migrationResult.preview.commentCount, color: "text-purple-400" },
+                ].map((s) => (
+                  <div key={s.label} className="text-center">
+                    <div className={`text-[18px] font-bold ${s.color}`}>{s.value}</div>
+                    <div className="text-[10px] text-muted-foreground/30">{s.label}</div>
+                  </div>
+                ))}
+              </div>
+              {migrationResult.preview.postTitles.length > 0 && (
+                <div>
+                  <p className="text-[10px] text-muted-foreground/30 mb-[4px]">文章列表（前 20 篇）：</p>
+                  <div className="max-h-[120px] overflow-y-auto space-y-[2px]">
+                    {migrationResult.preview.postTitles.map((p, i) => (
+                      <div key={i} className="text-[11px] text-muted-foreground/50 truncate">· {p.title}</div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {migrationResult.preview.warnings.map((w, i) => (
+                <p key={i} className="text-[10px] text-amber-400/60 flex items-center gap-[4px]">
+                  <AlertTriangle className="h-[10px] w-[10px] shrink-0" />{w}
+                </p>
+              ))}
+              <div className="flex items-center justify-between pt-[4px]">
+                <div className="flex gap-[12px] text-[10px] text-muted-foreground/25">
+                  <span>📋 <b>合并</b>：跳过已存在的文章</span>
+                  <span>🔄 <b>覆盖</b>：更新已存在的文章</span>
+                </div>
+                <div className="flex gap-[6px]">
+                  <button onClick={() => setMigrationResult(null)}
+                    className="h-[28px] px-[10px] rounded-md text-[11px] text-muted-foreground/50 hover:text-foreground border border-border/20 transition-colors"
+                  >取消</button>
+                  <select value={migrationMode} onChange={(e) => setMigrationMode(e.target.value as "merge" | "overwrite")}
+                    className="h-[28px] rounded-md border border-border/25 bg-background/20 px-[8px] text-[11px] text-muted-foreground outline-none"
+                  >
+                    <option value="merge">合并导入</option>
+                    <option value="overwrite">覆盖导入</option>
+                  </select>
+                  <button onClick={handleMigrationImport} disabled={migrationImporting}
+                    className="inline-flex items-center gap-[4px] h-[28px] px-[12px] rounded-md bg-cyan-500 text-white text-[11px] font-medium hover:opacity-90 disabled:opacity-50 transition-opacity"
+                  >
+                    <Database className="h-[10px] w-[10px]" />{migrationImporting ? "导入中..." : "确认导入"}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* 分割线 */}
           <div className="border-t border-border/15" />
