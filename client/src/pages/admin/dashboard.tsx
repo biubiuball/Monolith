@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { Link, useLocation } from "wouter";
 import { checkAuth, clearToken, fetchAdminPosts, deletePost, batchOperatePosts, fetchViewStats, type Post, type ViewStats } from "@/lib/api";
-import { Plus, Edit, Trash2, LogOut, Eye, FileText, Tag, Clock, Search, Settings, ExternalLink, HardDrive, StickyNote, TrendingUp, BarChart3, MessageCircle, Image as ImageIcon, ArrowRight, Globe, CheckCircle2, AlertTriangle, XCircle, CheckSquare, Square, EyeOff } from "lucide-react";
+import { Plus, Edit, Trash2, Eye, FileText, Clock, Search, ExternalLink, Globe, CheckCircle2, AlertTriangle, XCircle, CheckSquare, Square, EyeOff, TrendingUp, ArrowRight, BarChart3 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 function timeAgo(d: string): string {
@@ -112,7 +112,7 @@ export function AdminDashboard() {
     }
   };
 
-  const handleLogout = () => { clearToken(); setLocation("/admin/login"); };
+
 
   const publishedCount = posts.filter((p) => p.published).length;
   const draftCount = posts.filter((p) => !p.published).length;
@@ -121,46 +121,19 @@ export function AdminDashboard() {
     return Array.from(tagSet).sort();
   }, [posts]);
 
-  // 导航项配置
-  const navItems = [
-    { href: "/admin/settings",  icon: Settings,       label: "设置",   color: "text-blue-400",    bg: "bg-blue-500/10" },
-    { href: "/admin/pages",     icon: StickyNote,     label: "页面",   color: "text-violet-400",  bg: "bg-violet-500/10" },
-    { href: "/admin/comments",  icon: MessageCircle,  label: "评论",   color: "text-emerald-400", bg: "bg-emerald-500/10" },
-    { href: "/admin/media",      icon: ImageIcon,      label: "媒体",   color: "text-amber-400",   bg: "bg-amber-500/10" },
-    { href: "/admin/analytics",  icon: BarChart3,      label: "分析",   color: "text-cyan-400",    bg: "bg-cyan-500/10" },
-    { href: "/admin/backup",     icon: HardDrive,      label: "备份",   color: "text-rose-400",    bg: "bg-rose-500/10" },
-  ];
 
   return (
     <div className="mx-auto w-full max-w-[960px] py-[24px] sm:py-[36px] px-[16px] sm:px-[20px]">
 
-      {/* ═══════════ 顶栏：标题 + 导航 + 操作 ═══════════ */}
-      <div className="mb-[28px] sm:mb-[32px]">
-        <div className="flex items-center justify-between mb-[20px]">
-          <h1 className="text-[22px] sm:text-[28px] font-semibold tracking-[-0.02em]">管理后台</h1>
+      {/* ═══════════ 顶栏：标题 + 操作 ═══════════ */}
+      <div className="mb-[24px] sm:mb-[32px]">
+        <div className="flex items-center justify-between">
+          <h1 className="text-[22px] sm:text-[28px] font-semibold tracking-[-0.02em]">控制台</h1>
           <div className="flex items-center gap-[6px]">
-            <a href="/" target="_blank" className="inline-flex items-center justify-center h-[34px] w-[34px] rounded-lg border border-border/30 text-muted-foreground/40 hover:text-foreground hover:border-border/60 transition-all" title="查看站点">
-              <ExternalLink className="h-[14px] w-[14px]" />
-            </a>
             <Link href="/admin/editor" className="inline-flex items-center gap-[5px] h-[34px] px-[14px] rounded-lg bg-foreground text-background text-[13px] font-medium hover:opacity-90 transition-opacity">
               <Plus className="h-[14px] w-[14px]" />写文章
             </Link>
-            <button onClick={handleLogout} className="inline-flex items-center justify-center h-[34px] w-[34px] rounded-lg border border-border/30 text-muted-foreground/30 hover:text-red-400 hover:border-red-400/30 transition-all" title="退出登录">
-              <LogOut className="h-[14px] w-[14px]" />
-            </button>
           </div>
-        </div>
-
-        {/* 导航条 — 紧凑的横排按钮 */}
-        <div className="flex items-center gap-[4px] p-[3px] rounded-xl bg-card/8 border border-border/15">
-          {navItems.map((item) => (
-            <Link key={item.href} href={item.href}
-              className="group flex items-center gap-[6px] rounded-lg px-[12px] sm:px-[14px] py-[8px] text-[12px] sm:text-[13px] text-muted-foreground/60 hover:text-foreground hover:bg-card/40 transition-all flex-1 justify-center"
-            >
-              <item.icon className={`h-[14px] w-[14px] ${item.color} opacity-60 group-hover:opacity-100 transition-opacity`} />
-              <span className="hidden sm:inline">{item.label}</span>
-            </Link>
-          ))}
         </div>
       </div>
 
