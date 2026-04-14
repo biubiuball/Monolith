@@ -1,12 +1,12 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Link, useLocation } from "wouter";
 import {
-  checkAuth, fetchMedia, deleteMedia, uploadImage,
+  checkAuth, fetchMedia, deleteMedia, uploadImage, getToken,
   type MediaItem,
 } from "@/lib/api";
 import {
   ArrowLeft, Trash2, Image as ImageIcon, Grid, List, Upload,
-  Copy, Check, X, Eye,
+  Copy, Check, X, Eye, ImageDown,
 } from "lucide-react";
 
 function formatSize(bytes: number): string {
@@ -40,6 +40,8 @@ export function AdminMedia() {
   const [copied, setCopied] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [localizing, setLocalizing] = useState(false);
+  const [msg, setMsg] = useState<{ text: string; type: "success" | "error" } | null>(null);
 
   useEffect(() => {
     document.title = "媒体库 | Monolith";
@@ -198,6 +200,47 @@ export function AdminMedia() {
           )}
         </p>
       </div>
+
+      {/* ─── 外链图片转本地 ─── */}
+      <div className="mb-[16px] rounded-lg border border-border/25 bg-card/10 p-[14px] flex items-center justify-between">
+        <div>
+          <p className="text-[13px] text-foreground flex items-center gap-[5px]">
+            <ImageDown className="h-[13px] w-[13px] text-muted-foreground/50" />外链图片转本地
+          </p>
+          <p className="text-[11px] text-muted-foreground/35 mt-[1px] ml-[18px]">扫描所有文章，将外链图片下载到对象存储并替换 URL</p>
+        </div>
+        <button onClick={async () => {
+          if (!confirm("确定扫描所有文章并转换外链图片？\n这可能需要较长时间。")) return;
+          setLocalizing(true);
+          setMsg(null);
+          try {
+            const token = getToken();
+            const res = await fetch("/api/admin/localize-all-images", {
+              method: "POST",
+              headers: { Authorization: `Bearer ${token}` },
+            });
+            const result = await res.json();
+            if (result.totalReplaced > 0) {
+              setMsg({ text: `已转换 ${result.totalReplaced} 张图片（涉及 ${result.posts.length} 篇文章）${result.totalFailed ? `，${result.totalFailed} 张失败` : ""}`, type: "success" });
+              loadMedia();
+            } else {
+              setMsg({ text: "所有文章均无外链图片", type: "success" });
+            }
+          } catch { setMsg({ text: "批量转换失败", type: "error" }); }
+          setLocalizing(false);
+        }} disabled={localizing}
+          className="inline-flex items-center gap-[5px] h-[32px] px-[12px] rounded-md text-[12px] text-muted-foreground border border-border/25 hover:text-foreground hover:border-foreground/20 disabled:opacity-50 transition-colors shrink-0"
+        >
+          {localizing ? "扫描中..." : "批量转换"}
+        </button>
+      </div>
+      {msg && (
+        <div className={`mb-[12px] rounded-md px-[12px] py-[8px] text-[12px] ${
+          msg.type === "success" ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-red-500/10 text-red-400 border border-red-500/20"
+        }`}>
+          {msg.text}
+        </div>
+      )}
 
       {/* ─── 全选 ─── */}
       {media.length > 0 && (

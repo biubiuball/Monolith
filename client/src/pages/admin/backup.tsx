@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useLocation } from "wouter";
 import { checkAuth, getToken } from "@/lib/api";
-import { ArrowLeft, HardDrive, Cloud, Globe, Download, Trash2, RefreshCw, Shield, Clock, Upload, Eye, FileUp, ChevronDown, ChevronUp, ImageDown, Database, AlertTriangle } from "lucide-react";
+import { ArrowLeft, HardDrive, Cloud, Globe, Download, Trash2, RefreshCw, Shield, Clock, Upload, Eye, FileUp, ChevronDown, ChevronUp, Database, AlertTriangle } from "lucide-react";
 import { platforms, type ImportResult, type PlatformInfo } from "@/lib/importers";
 import { Link } from "wouter";
 
@@ -46,8 +46,6 @@ export function AdminBackup() {
   const [migrationImporting, setMigrationImporting] = useState(false);
   const [migrationMode, setMigrationMode] = useState<"merge" | "overwrite">("merge");
   const [migrationParsing, setMigrationParsing] = useState(false);
-  // 批量外链转本地
-  const [localizing, setLocalizing] = useState(false);
 
   // 处理平台文件上传 → 客户端解析 → 展示预览
   const handleMigrationFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -436,35 +434,6 @@ export function AdminBackup() {
               </div>
             </div>
           )}
-
-          {/* 分割线 */}
-          <div className="border-t border-border/15" />
-
-          {/* 批量外链图片转本地 */}
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-[13px] text-foreground">外链图片转本地</p>
-              <p className="text-[11px] text-muted-foreground/35 mt-[1px]">扫描所有文章，将外链图片下载到 R2/S3 并替换 URL</p>
-            </div>
-            <button onClick={async () => {
-              if (!confirm("确定扫描所有文章并转换外链图片？\n这可能需要较长时间。")) return;
-              setLocalizing(true);
-              try {
-                const res = await fetch("/api/admin/localize-all-images", { method: "POST", headers: authHeaders });
-                const result = await res.json();
-                if (result.totalReplaced > 0) {
-                  showMsg(`已转换 ${result.totalReplaced} 张图片（涉及 ${result.posts.length} 篇文章）${result.totalFailed ? `，${result.totalFailed} 张失败` : ""}`, "success");
-                } else {
-                  showMsg("所有文章均无外链图片", "success");
-                }
-              } catch { showMsg("批量转换失败", "error"); }
-              setLocalizing(false);
-            }} disabled={localizing}
-              className="inline-flex items-center gap-[4px] h-[28px] px-[10px] rounded-md text-[11px] text-muted-foreground border border-border/25 hover:text-foreground hover:border-foreground/20 disabled:opacity-50 transition-colors"
-            >
-              <ImageDown className="h-[10px] w-[10px]" />{localizing ? "扫描中..." : "批量转换"}
-            </button>
-          </div>
         </div>
       </section>
 
