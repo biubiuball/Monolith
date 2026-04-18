@@ -426,6 +426,8 @@
   border: none;
   font-size: inherit;
   color: oklch(0.85 0 0);
+  display: block;
+  min-width: 100%;
 }
 
 /* 代码块包裹容器间距（统一管理 margin，pre 自身 margin 被 has-header 覆盖为 0） */
@@ -522,6 +524,7 @@
   border: 1px solid oklch(1 0 0 / 6%);
   border-bottom: none;
   border-radius: 8px 8px 0 0;
+  overflow: hidden;
 }
 
 .prose-monolith .has-header > pre {
@@ -538,6 +541,10 @@
   pointer-events: none;
   user-select: none;
   font-family: ui-monospace, "SF Mono", "Cascadia Code", "Fira Code", Consolas, monospace;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 70%;
 }
 
 /* 复制按钮（信息栏内） */
@@ -589,6 +596,7 @@
   font-size: 12px;
   color: oklch(0.55 0 0);
   font-family: ui-monospace, "SF Mono", "Cascadia Code", "Fira Code", Consolas, monospace;
+  overflow: hidden;
 }
 
 .prose-monolith .has-title pre {
@@ -614,12 +622,16 @@
 
 .prose-monolith .code-title-text {
   color: oklch(0.55 0 0);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: calc(100% - 80px);
 }
 
 /* 代码行布局 */
 .prose-monolith pre code .code-line {
   display: inline-block;
-  width: 100%;
+  min-width: 100%;
   padding: 0 4px;
   margin: 0 -4px;
   border-radius: 2px;
@@ -635,11 +647,19 @@
   user-select: none;
   pointer-events: none;
   font-size: 11px;
+  position: sticky;
+  left: 0;
+  z-index: 10;
+  background: oklch(0.15 0.006 220);
+}
+
+:root[data-theme="light"] .prose-monolith pre code .line-number {
+  background: oklch(0.96 0.002 250);
 }
 
 /* 有行号时调整 pre 左边距 */
 .prose-monolith .has-line-numbers pre {
-  padding-left: 8px;
+  padding-left: 16px;
 }
 
 /* 高亮行 */
@@ -647,11 +667,11 @@
   background: oklch(0.65 0.15 200 / 10%);
   border-left: 2px solid oklch(0.65 0.15 200);
   padding-left: 6px;
-  margin-left: -8px;
+  margin-left: -4px;
 }
 
 .prose-monolith .has-line-numbers pre code .line-highlight {
-  margin-left: -8px;
+  margin-left: -4px;
   padding-left: 6px;
 }
 
@@ -660,14 +680,14 @@
   background: oklch(0.55 0.15 145 / 12%);
   border-left: 2px solid oklch(0.6 0.17 145);
   padding-left: 6px;
-  margin-left: -8px;
+  margin-left: -6px;
 }
 
 .prose-monolith pre code .diff-del {
   background: oklch(0.55 0.15 25 / 12%);
   border-left: 2px solid oklch(0.6 0.17 25);
   padding-left: 6px;
-  margin-left: -8px;
+  margin-left: -6px;
 }
 
 /* 图片 figure */
@@ -749,27 +769,27 @@
 /* ─────────────────────────────────────────────
    Highlight.js 暗色代码高亮主题（极简定制）
    ───────────────────────────────────────────── */
-.hljs { color: oklch(0.82 0 0); }
-.hljs-keyword { color: oklch(0.72 0.16 200); }
-.hljs-string { color: oklch(0.72 0.12 150); }
-.hljs-number { color: oklch(0.75 0.13 60); }
-.hljs-comment { color: oklch(0.5 0 0); font-style: italic; }
-.hljs-function { color: oklch(0.78 0.1 230); }
-.hljs-title { color: oklch(0.78 0.12 230); }
-.hljs-title.function_ { color: oklch(0.78 0.12 230); }
-.hljs-params { color: oklch(0.78 0.06 60); }
-.hljs-type { color: oklch(0.75 0.12 200); }
-.hljs-built_in { color: oklch(0.75 0.12 200); }
-.hljs-literal { color: oklch(0.72 0.13 30); }
-.hljs-attr { color: oklch(0.78 0.1 80); }
-.hljs-property { color: oklch(0.78 0.08 230); }
-.hljs-meta { color: oklch(0.65 0.08 220); }
-.hljs-punctuation { color: oklch(0.6 0 0); }
-.hljs-variable { color: oklch(0.8 0.06 200); }
-.hljs-tag { color: oklch(0.72 0.14 10); }
-.hljs-name { color: oklch(0.72 0.14 10); }
-.hljs-selector-class { color: oklch(0.75 0.12 80); }
-.hljs-selector-id { color: oklch(0.75 0.12 80); }
+.hljs { color: oklch(0.88 0 0); }
+.hljs-keyword { color: oklch(0.78 0.16 200); }
+.hljs-string { color: oklch(0.78 0.12 150); }
+.hljs-number { color: oklch(0.82 0.13 60); }
+.hljs-comment { color: oklch(0.65 0 0); font-style: italic; }
+.hljs-function { color: oklch(0.85 0.1 230); }
+.hljs-title { color: oklch(0.85 0.12 230); }
+.hljs-title.function_ { color: oklch(0.85 0.12 230); }
+.hljs-params { color: oklch(0.85 0.06 60); }
+.hljs-type { color: oklch(0.82 0.12 200); }
+.hljs-built_in { color: oklch(0.82 0.12 200); }
+.hljs-literal { color: oklch(0.78 0.13 30); }
+.hljs-attr { color: oklch(0.85 0.1 80); }
+.hljs-property { color: oklch(0.85 0.08 230); }
+.hljs-meta { color: oklch(0.75 0.08 220); }
+.hljs-punctuation { color: oklch(0.70 0 0); }
+.hljs-variable { color: oklch(0.88 0.06 200); }
+.hljs-tag { color: oklch(0.78 0.14 10); }
+.hljs-name { color: oklch(0.78 0.14 10); }
+.hljs-selector-class { color: oklch(0.82 0.12 80); }
+.hljs-selector-id { color: oklch(0.82 0.12 80); }
 
 /* ── 亮色模式代码高亮覆盖 ─── */
 :root[data-theme="light"] .hljs { color: oklch(0.30 0 0); }
@@ -1255,6 +1275,19 @@
   display: flex;
   justify-content: center;
   gap: 8px;
+}
+
+@media (max-width: 640px) {
+  .post-reactions__buttons {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .post-reactions__btn {
+    min-width: 88px;
+    justify-content: center;
+    padding: 8px 12px;
+  }
 }
 
 .post-reactions__btn {

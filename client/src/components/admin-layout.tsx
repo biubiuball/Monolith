@@ -13,6 +13,7 @@ import {
   ExternalLink,
   Menu,
 } from "lucide-react";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -113,6 +114,10 @@ export function AdminLayout({ children }: AdminLayoutProps) {
       {/* Footer / User Profile */}
       <div className="p-4 mt-auto border-t">
         <div className="space-y-1">
+          <div className="flex items-center justify-between px-3 py-2">
+            <span className="text-sm font-medium text-muted-foreground">主题设置</span>
+            <ThemeToggle />
+          </div>
           <a
             href="/"
             target="_blank"
@@ -164,15 +169,18 @@ export function AdminLayout({ children }: AdminLayoutProps) {
              <div className="w-6 h-6 rounded bg-foreground text-background flex items-center justify-center text-xs font-bold">M</div>
              <span>Admin</span>
           </div>
-          <button
-            onClick={() => setMobileMenuOpen(true)}
-            className="p-2 -mr-2 text-muted-foreground hover:text-foreground"
-            aria-label="打开后台导航菜单"
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <button
+              onClick={() => setMobileMenuOpen(true)}
+              className="p-2 -mr-2 text-muted-foreground hover:text-foreground"
+              aria-label="打开后台导航菜单"
             aria-expanded={mobileMenuOpen}
-            aria-controls="admin-mobile-navigation"
-          >
-            <Menu className="w-5 h-5" />
-          </button>
+              aria-controls="admin-mobile-navigation"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+          </div>
         </header>
 
         {/* Content Area */}

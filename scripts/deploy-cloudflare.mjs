@@ -110,6 +110,17 @@ if (!options.skipMigrate) {
 }
 
 if (!options.skipServer) {
+  if (process.env.ADMIN_PASSWORD) {
+    runStep("写入 Backend 的 ADMIN_PASSWORD", "npx", [
+      "wrangler", "secret", "put", "ADMIN_PASSWORD", "--name", "monolith-server"
+    ], { input: `${process.env.ADMIN_PASSWORD}\n`, cwd: `${projectRoot}/server` });
+  }
+  if (process.env.JWT_SECRET) {
+    runStep("写入 Backend 的 JWT_SECRET", "npx", [
+      "wrangler", "secret", "put", "JWT_SECRET", "--name", "monolith-server"
+    ], { input: `${process.env.JWT_SECRET}\n`, cwd: `${projectRoot}/server` });
+  }
+
   const deployOutput = runCapture("部署 Cloudflare Workers 后端", "npm", ["run", "deploy:server"]);
   if (!options.apiBase) {
     options.apiBase = detectWorkersUrl(deployOutput);
@@ -136,7 +147,7 @@ if (!options.skipClient) {
     "wrangler",
     "pages",
     "deploy",
-    "client/dist",
+    "dist",
     "--project-name",
     options.pagesProject,
     "--branch",
