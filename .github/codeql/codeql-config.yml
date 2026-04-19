@@ -1,0 +1,19 @@
+name: Custom CodeQL Configuration
+
+# 排除无需扫描的路径
+paths-ignore:
+  - '**/node_modules/**'
+  - '**/dist/**'
+  - '**/*.config.*'
+  - '**/*.min.js'
+  - 'scripts/**'
+  - '.github/**'
+
+# 排除无需扫描的测试文件（测试中常有意构造的"不安全"代码）
+paths:
+  - 'client/src/**'
+  - 'server/src/**'
+
+# 仅扫描 JavaScript/TypeScript 相关查询套件
+queries:
+  - uses: security-and-quality
