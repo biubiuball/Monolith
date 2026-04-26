@@ -49,6 +49,7 @@
 - **边缘原生** — Hono + Cloudflare Workers，无冷启动，全球 < 50ms
 - **存储适配** — 数据库 D1 / Turso / PostgreSQL，对象存储 R2 / S3 兼容
 - **零运维成本** — 单脚本一键部署，前后端走同一条流水线
+- **访客分析** — 内置 D1 `visits` 表轻量统计；**Cloudflare 部署专属**额外解锁 Analytics Engine 增强仪表板（UV/停留时长/浏览器/操作系统/分辨率/语言），其他后端 (Turso / PostgreSQL) 仅基础统计可用
 
 ### 🛡️ 安全合规
 - **认证与防护** — JWT + 限流，CSP/HSTS 全套头，SSRF 拦截
@@ -137,12 +138,18 @@ npm run dev
 ## ☁️ 部署
 
 ```bash
-npm run deploy:cloudflare
+npx wrangler login          # 首次部署一次即可
+npm run deploy:cloudflare   # 远程迁移 → Workers → API_BASE 注入 → Pages
 ```
 
-一条命令完成「远程迁移 → Workers → API_BASE 注入 → Pages 前端」全链路，亦支持 GitHub Actions 触发。
+支持 Windows / macOS / Linux 三端，脚本启动会自动预检 wrangler 登录态、Token、账户 ID 与 Node 版本。
 
-> 部署参数、CI 配置与故障排查请参阅 [**Wiki · 部署指南**](https://github.com/one-ea/Monolith/wiki/Deployment)。
+> 完整部署指南（含 Cloudflare 资源准备、密钥生成、CI 部署、故障排查）请参阅 [**Wiki · 部署指南**](https://github.com/one-ea/Monolith/wiki/Deployment)。
+
+| 方案 | 状态 | 适用场景 |
+|------|------|---------|
+| 本机 CLI `npm run deploy:cloudflare` | ✅ 生产验证 | 推荐首选 |
+| GitHub Actions `Cloudflare Deploy` | ⚠️ 待端到端验证 | CI/CD 集成（验收前请慎用） |
 
 ---
 
@@ -150,7 +157,8 @@ npm run deploy:cloudflare
 
 | 入口 | 内容 |
 |------|------|
-| [Wiki](https://github.com/one-ea/Monolith/wiki) | 架构、部署、API、二次开发 |
+| [Wiki · 部署指南](https://github.com/one-ea/Monolith/wiki/Deployment) | Cloudflare 部署完整指南（速通 + 进阶 + 排错） |
+| [Wiki](https://github.com/one-ea/Monolith/wiki) | 架构、API、二次开发 |
 | [SECURITY.md](./SECURITY.md) | 安全策略与漏洞披露 |
 | [PRIVACY.md](./PRIVACY.md) | 隐私政策 |
 | [LICENSE](./LICENSE) | MIT 开源协议 |
