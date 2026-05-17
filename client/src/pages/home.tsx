@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "wouter";
-import { Hero } from "@/components/hero";
+import { Hero, type HeroAction, type HeroTopic } from "@/components/hero";
 import { ArticleCard } from "@/components/article-card";
 
 import { Separator } from "@/components/ui/separator";
@@ -13,6 +13,12 @@ type PublicSettings = {
   site_title: string;
   site_description: string;
   site_tagline: string;
+  hero_kicker: string;
+  hero_subtitle: string;
+  hero_description: string;
+  hero_actions: string;
+  hero_topics: string;
+  site_og_image: string;
   author_name: string;
   author_title: string;
   author_bio: string;
@@ -23,6 +29,18 @@ type PublicSettings = {
   social_links: string;
   rss_enabled: string;
 };
+
+const DEFAULT_HERO_ACTIONS: HeroAction[] = [
+  { label: "最新文章", href: "#latest-posts" },
+  { label: "主题索引", href: "#content-index" },
+  { label: "工程笔记", href: "/archive" },
+];
+
+const DEFAULT_HERO_TOPICS: HeroTopic[] = [
+  { title: "系统设计", desc: "从边界、接口和运维成本切入" },
+  { title: "阅读体验", desc: "让长文、代码与目录保持同一节奏" },
+  { title: "边缘部署", desc: "Workers / D1 / R2 的真实工程路径" },
+];
 
 type TrafficData = {
   totalViews: number;
@@ -120,6 +138,42 @@ function getPublicSocialLinks(settings: PublicSettings | null): { id: string; ic
   return links;
 }
 
+function parseHeroActions(value?: string): HeroAction[] {
+  if (!value?.trim()) return DEFAULT_HERO_ACTIONS;
+  try {
+    const parsed: unknown = JSON.parse(value);
+    if (!Array.isArray(parsed)) return DEFAULT_HERO_ACTIONS;
+    const actions = parsed
+      .filter((item): item is Record<string, unknown> => typeof item === "object" && item !== null)
+      .map((item) => ({
+        label: typeof item.label === "string" ? item.label : "",
+        href: typeof item.href === "string" ? item.href : "",
+      }))
+      .filter((item) => item.label.trim() && item.href.trim());
+    return actions.length > 0 ? actions : DEFAULT_HERO_ACTIONS;
+  } catch {
+    return DEFAULT_HERO_ACTIONS;
+  }
+}
+
+function parseHeroTopics(value?: string): HeroTopic[] {
+  if (!value?.trim()) return DEFAULT_HERO_TOPICS;
+  try {
+    const parsed: unknown = JSON.parse(value);
+    if (!Array.isArray(parsed)) return DEFAULT_HERO_TOPICS;
+    const topics = parsed
+      .filter((item): item is Record<string, unknown> => typeof item === "object" && item !== null)
+      .map((item) => ({
+        title: typeof item.title === "string" ? item.title : "",
+        desc: typeof item.desc === "string" ? item.desc : "",
+      }))
+      .filter((item) => item.title.trim() && item.desc.trim());
+    return topics.length > 0 ? topics : DEFAULT_HERO_TOPICS;
+  } catch {
+    return DEFAULT_HERO_TOPICS;
+  }
+}
+
 /* ── 紧凑标签云 ── */
 const TAG_VISIBLE = 15;
 const CATEGORY_VISIBLE = 5;
@@ -144,7 +198,7 @@ function TagCloud({ tags, maxCount }: { tags: [string, number][]; maxCount: numb
           return (
             <span
               key={tag}
-              className="cursor-pointer whitespace-nowrap transition-colors duration-200 hover:text-foreground"
+              className="whitespace-nowrap transition-colors duration-200 hover:text-foreground"
               style={{ fontSize: `${size}px`, color: `color-mix(in oklch, var(--foreground) ${weight}%, var(--muted-foreground))` }}
               title={`${tag}（${count} 篇）`}
             >
@@ -158,7 +212,7 @@ function TagCloud({ tags, maxCount }: { tags: [string, number][]; maxCount: numb
           onClick={() => setExpanded(true)}
           className="mt-[8px] inline-flex min-h-[32px] items-center gap-[4px] rounded-md text-[11px] text-muted-foreground/40 transition-colors hover:text-muted-foreground/75 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
         >
-          展开全部 <ChevronDown className="h-[11px] w-[11px]" />
+          展开全部 <ChevronDown className="h-[12px] w-[12px]" />
         </button>
       )}
     </div>
@@ -173,7 +227,7 @@ function CategoryList({ categories }: { categories: CategoryInfo[] }) {
   return (
     <div className="rounded-md border border-border/25 bg-background/25 p-[18px]">
       <h3 className="mb-[12px] flex items-center gap-[6px] text-[13px] font-medium tracking-normal text-muted-foreground/60">
-        <FolderOpen className="h-[13px] w-[13px]" />
+        <FolderOpen className="h-[14px] w-[14px]" />
         分类
         <span className="ml-auto text-[10px] font-mono text-muted-foreground/25">{categories.length}</span>
       </h3>
@@ -197,7 +251,7 @@ function CategoryList({ categories }: { categories: CategoryInfo[] }) {
           className="mt-[10px] inline-flex min-h-[36px] w-full items-center justify-center gap-[4px] rounded-md border border-border/15 text-[11px] text-muted-foreground/50 transition-colors hover:bg-accent/35 hover:text-muted-foreground/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
         >
           {expanded ? "收起分类" : `展开 ${categories.length - CATEGORY_VISIBLE} 个更多分类`}
-          <ChevronDown className={`h-[11px] w-[11px] transition-transform ${expanded ? "rotate-180" : ""}`} />
+          <ChevronDown className={`h-[12px] w-[12px] transition-transform ${expanded ? "rotate-180" : ""}`} />
         </button>
       )}
     </div>
@@ -219,18 +273,18 @@ function SparkLine({ data, width = 240, height = 48 }: { data: number[]; width?:
   const polyline = points.join(" ");
   const areaPath = `M${pad},${height - pad} ${points.map((p) => `L${p}`).join(" ")} L${pad + (data.length - 1) * step},${height - pad} Z`;
   return (
-    <svg viewBox={`0 0 ${width} ${height}`} className="w-full" style={{ height }}>
+    <svg viewBox={`0 0 ${width} ${height}`} className="w-full text-foreground/45" style={{ height }} aria-hidden="true">
       <defs>
         <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="oklch(0.75 0.15 220)" stopOpacity="0.3" />
-          <stop offset="100%" stopColor="oklch(0.75 0.15 220)" stopOpacity="0.02" />
+          <stop offset="0%" stopColor="currentColor" stopOpacity="0.22" />
+          <stop offset="100%" stopColor="currentColor" stopOpacity="0.02" />
         </linearGradient>
       </defs>
       <path d={areaPath} fill={`url(#${gradId})`} />
-      <polyline fill="none" stroke="oklch(0.75 0.15 220)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" points={polyline} />
+      <polyline fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" points={polyline} />
       {/* 末端圆点 */}
       {data.length > 0 && (
-        <circle cx={pad + (data.length - 1) * step} cy={height - pad - ((data[data.length - 1] / max) * (height - pad * 2))} r="2.5" fill="oklch(0.75 0.15 220)" />
+        <circle cx={pad + (data.length - 1) * step} cy={height - pad - ((data[data.length - 1] / max) * (height - pad * 2))} r="2.5" fill="currentColor" />
       )}
     </svg>
   );
@@ -276,15 +330,70 @@ export function HomePage() {
   const authorTitle = settings?.author_title || "独立开发者";
   const authorBio = settings?.author_bio || "热衷于前端架构、设计系统与边缘计算。相信技术应当服务于人，而非反过来。";
   const authorAvatar = settings?.author_avatar || "";
+  const siteTitle = settings?.site_title || "Monolith";
+  const siteDescription = settings?.site_description || "书写代码、设计与边缘计算的个人博客。";
+  const heroDescription = settings?.hero_description || settings?.site_description || undefined;
+  const heroActions = parseHeroActions(settings?.hero_actions);
+  const heroTopics = parseHeroTopics(settings?.hero_topics);
 
   // 社交链接（优先读取新版可扩展列表，旧字段作为兼容回退）
   const socialLinks = getPublicSocialLinks(settings);
+  const latestPost = posts[0];
 
   return (
     <div className="flex flex-col">
-      <SeoHead url="/" />
-      <Hero />
-      <div className="grid grid-cols-1 gap-[32px] py-[36px] lg:grid-cols-[minmax(0,1fr)_260px] lg:gap-[44px]">
+      <SeoHead
+        siteName={siteTitle}
+        description={siteDescription}
+        image={settings?.site_og_image || undefined}
+        url="/"
+      />
+      <Hero
+        title={siteTitle}
+        kicker={settings?.hero_kicker || undefined}
+        subtitle={settings?.hero_subtitle || settings?.site_tagline || undefined}
+        description={heroDescription}
+        actions={heroActions}
+        topics={heroTopics}
+      />
+      <div className="grid grid-cols-1 gap-[12px] border-b border-border/18 py-[18px] sm:grid-cols-3">
+        {[
+          { label: "文章", value: loading ? "..." : posts.length.toString(), detail: "可读内容" },
+          { label: "标签", value: loading ? "..." : sortedTags.length.toString(), detail: "主题索引" },
+          { label: "浏览", value: traffic?.totalViews?.toLocaleString() ?? "...", detail: "累计访问" },
+        ].map((item) => (
+          <div key={item.label} className="rounded-md border border-border/16 bg-background/24 px-[16px] py-[14px] transition-colors hover:border-border/32 hover:bg-card/[0.10]">
+            <p className="font-mono text-[11px] text-muted-foreground/42">{item.label}</p>
+            <div className="mt-[8px] flex items-end justify-between gap-[12px]">
+              <span className="font-heading text-[28px] font-semibold leading-none tracking-[-0.03em] text-foreground/90">{item.value}</span>
+              <span className="text-[12px] text-muted-foreground/45">{item.detail}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+      {latestPost && (
+        <AnimateIn>
+          <Link
+            href={`/posts/${latestPost.slug}`}
+            className="group mt-[28px] grid rounded-md border border-border/20 bg-card/[0.12] p-[18px] transition-all duration-300 hover:-translate-y-[2px] hover:border-border/45 hover:bg-card/[0.18] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring md:grid-cols-[112px_minmax(0,1fr)_auto] md:items-center md:gap-[22px]"
+          >
+            <div className="flex items-center gap-[8px] font-mono text-[11px] text-muted-foreground/46">
+              <span className="h-[6px] w-[6px] rounded-full bg-foreground/42" />
+              Latest
+            </div>
+            <div className="min-w-0">
+              <h2 className="mt-[6px] font-heading text-[22px] font-semibold leading-tight tracking-[-0.02em] text-foreground md:mt-0 md:text-[26px]">
+                {latestPost.title}
+              </h2>
+              <p className="mt-[8px] line-clamp-2 text-[14px] leading-[1.7] text-muted-foreground/72">{latestPost.excerpt}</p>
+            </div>
+            <span className="mt-[14px] inline-flex min-h-[36px] items-center gap-[6px] text-[13px] text-muted-foreground/55 transition-colors group-hover:text-foreground md:mt-0">
+              继续阅读 <ExternalLink className="h-[14px] w-[14px]" />
+            </span>
+          </Link>
+        </AnimateIn>
+      )}
+      <div className="grid grid-cols-1 gap-[32px] py-[36px] lg:grid-cols-[minmax(0,1fr)_280px] lg:gap-[44px]">
         <section>
           <AnimateIn>
             <div id="latest-posts" className="mb-[24px] flex flex-col gap-[8px] border-l border-border/50 pl-[14px] sm:flex-row sm:items-end sm:justify-between">
@@ -323,7 +432,7 @@ export function HomePage() {
           )}
         </section>
 
-        <aside className="block">
+        <aside id="content-index" className="block scroll-mt-[80px]">
           <div className="grid gap-[16px] sm:grid-cols-2 lg:sticky lg:top-[72px] lg:mt-[58px] lg:flex lg:flex-col lg:gap-[18px]">
             {/* ── 博主名片 ── */}
             <AnimateIn animation="animate-fade-in" delay="delay-2">
@@ -336,7 +445,7 @@ export function HomePage() {
                       className="h-[40px] w-[40px] rounded-full object-cover border border-border/30"
                     />
                   ) : (
-                    <div className="flex h-[40px] w-[40px] items-center justify-center rounded-full bg-gradient-to-br from-blue-500/30 to-cyan-500/30 text-[15px] font-semibold text-foreground">
+                    <div className="flex h-[40px] w-[40px] items-center justify-center rounded-full border border-border/25 bg-foreground/[0.06] text-[15px] font-semibold text-foreground">
                       {authorName.charAt(0).toUpperCase()}
                     </div>
                   )}
@@ -401,7 +510,7 @@ export function HomePage() {
                   </>
                 ) : (
                   <div className="flex items-center gap-[6px] py-[8px]">
-                    <Eye className="h-[13px] w-[13px] text-muted-foreground/15" />
+                    <Eye className="h-[14px] w-[14px] text-muted-foreground/15" />
                     <span className="text-[12px] text-muted-foreground/20">暂无访问数据</span>
                   </div>
                 )}
