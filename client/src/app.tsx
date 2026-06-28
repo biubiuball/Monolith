@@ -52,6 +52,30 @@ function injectHtml(container: HTMLElement, html: string) {
   });
 }
 
+function removeCustomInjection() {
+  document.querySelectorAll("[data-monolith-custom-injection=\"true\"]").forEach((node) => node.remove());
+}
+
+function syncDocumentBrand(settings: { site_title?: string; site_description?: string; site_icon?: string }) {
+  const siteTitle = settings.site_title?.trim();
+  const description = settings.site_description?.trim();
+  const icon = settings.site_icon?.trim();
+
+  if (siteTitle && document.title.startsWith("Monolith")) {
+    document.title = description ? `${siteTitle} — ${description}` : siteTitle;
+  }
+
+  if (icon) {
+    let link = document.querySelector('link[rel="icon"]') as HTMLLinkElement | null;
+    if (!link) {
+      link = document.createElement("link");
+      link.rel = "icon";
+      document.head.appendChild(link);
+    }
+    link.href = icon;
+  }
+}
+
 function matchesPathPrefix(pathname: string, prefix: string) {
   return pathname === prefix || pathname.startsWith(`${prefix}/`);
 }
@@ -74,22 +98,36 @@ export function App() {
 
   // 注入自定义 header/footer 代码（需 Cookie 同意后加载第三方脚本）
   useEffect(() => {
+    removeCustomInjection();
+    if (isAdminRoot) return undefined;
+
+    let cancelled = false;
+    let cleanupConsentListener: (() => void) | undefined;
+
     fetch("/api/settings/public")
       .then((r) => r.json())
       .then((s) => {
+        if (cancelled) return;
+        syncDocumentBrand(s);
         const hasThirdParty = (s.custom_header && /<script/i.test(s.custom_header))
           || (s.custom_footer && /<script/i.test(s.custom_footer));
 
         const inject = () => {
+          if (cancelled) return;
+          removeCustomInjection();
           if (s.custom_header) {
             const container = document.createElement("div");
             container.id = "monolith-custom-header";
             injectHtml(container, s.custom_header);
-            Array.from(container.childNodes).forEach((n) => document.head.appendChild(n));
+            Array.from(container.childNodes).forEach((n) => {
+              if (n instanceof HTMLElement) n.dataset.monolithCustomInjection = "true";
+              document.head.appendChild(n);
+            });
           }
           if (s.custom_footer) {
             const container = document.createElement("div");
             container.id = "monolith-custom-footer";
+            container.dataset.monolithCustomInjection = "true";
             injectHtml(container, s.custom_footer);
             document.body.appendChild(container);
           }
@@ -102,10 +140,16 @@ export function App() {
           inject();
         } else {
           window.addEventListener("cookie-consent-accepted", inject, { once: true });
+          cleanupConsentListener = () => window.removeEventListener("cookie-consent-accepted", inject);
         }
       })
       .catch(() => {});
-  }, []);
+    return () => {
+      cancelled = true;
+      cleanupConsentListener?.();
+      removeCustomInjection();
+    };
+  }, [isAdminRoot]);
 
   return (
     <>
